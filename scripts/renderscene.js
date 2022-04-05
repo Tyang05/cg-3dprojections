@@ -96,6 +96,7 @@ function drawScene() {
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
 
             //These if statements are converting models of specific types into generic models that hold their edges and verticies
+            //Functions being called are at the bottom of this file
             if(scene.models[i].type == "cube") {
                 scene.models[i] = drawCube(scene.models[i]);
             } else if(scene.models[i].type == "cone") {
@@ -412,7 +413,11 @@ let modelCube = {
     "center": [4, 4, -10],
     "width": 8,
     "height": 8,
-    "depth": 8
+    "depth": 8,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
 }
 
 let modelCone = { 
@@ -420,7 +425,11 @@ let modelCone = {
     "center": [20,10, -60],
     "radius": 5,
     "height": 5,
-    "sides": 100
+    "sides": 100,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
 }
 
 let modelCylinder = {
@@ -440,7 +449,11 @@ let modelSphere = {
     "center": [-20, 3,-20],
     "radius": 20,
     "slices": 100,
-    "stacks": 100
+    "stacks": 100,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
 
 }
 let generic = {
