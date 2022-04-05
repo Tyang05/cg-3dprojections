@@ -94,9 +94,20 @@ function drawScene() {
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
+
+            //These if statements are converting models of specific types into generic models that hold their edges and verticies
+            if(scene.models[i].type == "cube") {
+                scene.models[i] = drawCube(scene.models[i]);
+            } else if(scene.models[i].type == "cone") {
+                scene.models[i] = drawCone(scene.models[i]);
+            } else if(scene.models[i].type == "cylinder") {
+                scene.models[i] = drawCylinder(scene.models[i]);
+            } else if(scene.models[i].type == "sphere") {
+                scene.models[i] = drawSphere(scene.models[i]);
+            } 
+
             vertices[j] = nPer.mult(scene.models[i].vertices[j]);
-           // vertices[j] = scene.models[i].vertices[j].mult(matrix);
-         //  console.log(vertices[j]);
+           
         }
     }
 
@@ -393,4 +404,88 @@ function drawLine(x1, y1, x2, y2) {
     ctx.fillStyle = '#FF0000';
     ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
     ctx.fillRect(x2 - 2, y2 - 2, 4, 4);
+}
+
+
+let modelCube = {
+    "type": "cube",
+    "center": [4, 4, -10],
+    "width": 8,
+    "height": 8,
+    "depth": 8
+}
+
+let modelCone = { 
+    "type": "cone",
+    "center": [20,10, -60],
+    "radius": 5,
+    "height": 5,
+    "sides": 100
+}
+
+let modelCylinder = {
+    "type": "cylinder",
+    "center": [12, 10, -49],
+    "radius": 1.5,
+    "height": 5,
+    "sides": 12,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
+}
+
+let modelSphere = {
+    "type": "sphere",
+    "center": [-20, 3,-20],
+    "radius": 20,
+    "slices": 100,
+    "stacks": 100
+
+}
+let generic = {
+    "type": "generic",
+    vertices: [],
+    edges: [],
+    matrix: new Matrix(4, 4)
+}
+
+function drawCube(modelCube) {
+    let cube = new generic;
+    cube.vertices.push()
+    cube.edges.push();
+
+    return cube;
+}
+
+function drawCone(modelCone) {
+    //draw circle with 'sides' number of edges (on xz axis, not xy)
+    //draw one point at center + height
+    //connect top point with each of the circle's verticies 
+    let cone = new generic;
+    cone.vertices.push;
+    cone.edges.push;
+
+    return cone;
+
+}
+
+function drawCylinder(modelCylinder) {
+    //draw two circles (xz plane) 
+    //draw lines connecting each vertex in the circle
+    let cylinder = new generic;
+    cylinder.vertices.push;
+    cylinder.edges.push;
+
+    return cylinder;
+}
+
+function drawSphere(modelSphere) {
+    //draw the same circle but rotate 360/ slices degrees for longitudinal lines and then connect each edge for latitudinal line every 180/stacks degrees   
+    let sphere = new generic;
+    sphere.vertices.push;
+    sphere.edges.push;
+
+    return sphere;
+
 }
