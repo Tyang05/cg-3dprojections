@@ -98,6 +98,13 @@ function mat4x4MPer() {
 // 4x4 Transform Matrices                                                         //
 ///////////////////////////////////////////////////////////////////////////////////
 
+function mat4x4ProjectionToWindow(mat4x4, w, h) {
+    mat4x4.values = [[w/2,   0, 0, w/2],
+                     [0,   h/2, 0, h/2],
+                     [0,     0, 1,   0],
+                     [0,     0, 0,   1]];
+}
+
 // set values of existing 4x4 matrix to align (u,v,n) to (x,y,z)
 function mat4x4PerspectiveRotate(mat4x4, u, v, n) {
     mat4x4.values = [[u.x, u.y, u.z, 0],

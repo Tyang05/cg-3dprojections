@@ -128,33 +128,37 @@ function drawScene() {
                 line.pt0.z = pt0.data[2];
                 line.pt0.w = pt0.data[3];
 
-                line.pt1.x = pt0.data[0];
-                line.pt1.y = pt0.data[1];
-                line.pt1.z = pt0.data[2];
-                line.pt1.w = pt0.data[3];
+                line.pt1.x = pt1.data[0];
+                line.pt1.y = pt1.data[1];
+                line.pt1.z = pt1.data[2];
+                line.pt1.w = pt1.data[3];
 
-                // Clip the line (points)
+                // Clip the line
                 line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
 
                 // Set points to be a vector that contain the newly clipped values
                 pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
                 pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
 
-                // Multiply the points by mPer (view scene)
+                // Multiply the points by mPer (turn into view scene)
                 let mPer = mat4x4MPer();
                 pt0 = mPer.mult(pt0);
                 pt1 = mPer.mult(pt1);
 
+                // Convert points to to World Coordinate
+                let viewToWorld = new Matrix(4,4);
+                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                pt0 = viewToWorld.mult(pt0);
+                pt1 = viewToWorld.mult(pt1);
+
                 // Define points values to draw
-                // pt0.x = pt0.x / pt0.w
-                // pt0.y = pt0.y / pt0.w
-                pt0.x = pt0.data[0] / pt0.data[3];
-                pt0.y = pt0.data[1] / pt0.data[3];
-                pt1.x = pt1.data[0] / pt1.data[3];
-                pt1.y = pt1.data[1] / pt1.data[3];
+                let x1 = pt0.data[0] / pt0.data[3];
+                let y1 = pt0.data[1] / pt0.data[3]
+                let x2 = pt1.data[0] / pt1.data[3];
+                let y2 = pt1.data[1] / pt1.data[3]
 
                 // Draw the line
-                drawLine(pt0.x, pt0.y, pt1.x, pt1.y);
+                drawLine(x1, y1, x2, y2);
             }
         }
     }
@@ -314,6 +318,7 @@ function clipLinePerspective(line, z_min) {
                 p0.z = z;
                 out0 = outcodePerspective(p0,z_min);
             }
+
             // Else, it do the same but for out1
             else {
                 p1.x = x;
@@ -334,6 +339,7 @@ function clipLinePerspective(line, z_min) {
 
 // Called when user presses a key on the keyboard down 
 function onKeyDown(event) {
+
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
@@ -343,15 +349,23 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
+            scene.view.prp.x -= 2;
+            scene.view.srp.x -= 2;
             break;
         case 68: // D key
             console.log("D");
+            scene.view.prp.x += 2;
+            scene.view.srp.x += 2;
             break;
         case 83: // S key
             console.log("S");
+            scene.view.prp.z -= 2;
+            scene.view.srp.z -= 2;
             break;
         case 87: // W key
             console.log("W");
+            scene.view.prp.z += 2;
+            scene.view.srp.z += 2;
             break;
     }
 }
