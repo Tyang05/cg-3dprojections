@@ -55,6 +55,13 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
+            },
+            {
+                "type": 'cube',
+                "center": [-10, 30, -40],
+                "width": 10,
+                "height": 10,
+                "depth": 10
             }
         ]
     };
@@ -89,27 +96,27 @@ function drawScene() {
     // For each model, for each edge
     let nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
     let vertices = []; // array of all vertices that is multiplied by nPer and mPer
-    
+    let counter =0;
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
-        for (let j = 0; j < scene.models[i].vertices.length; j++) {
-
-            //These if statements are converting models of specific types into generic models that hold their edges and verticies
-            //Functions being called are at the bottom of this file
-            if(scene.models[i].type == "cube") {
-                scene.models[i] = drawCube(scene.models[i]);
-            } else if(scene.models[i].type == "cone") {
-                scene.models[i] = drawCone(scene.models[i]);
-            } else if(scene.models[i].type == "cylinder") {
-                scene.models[i] = drawCylinder(scene.models[i]);
-            } else if(scene.models[i].type == "sphere") {
-                scene.models[i] = drawSphere(scene.models[i]);
-            } 
-
-            vertices[j] = nPer.mult(scene.models[i].vertices[j]);
-           
+        //These if statements are converting models of specific types into generic models that hold their edges and verticies
+        //Functions being called are at the bottom of this file
+        if(scene.models[i].type == "cube") {
+            scene.models[i] = drawCube(scene.models[i]);
+        } else if(scene.models[i].type == "cone") {
+            scene.models[i] = drawCone(scene.models[i]);
+        } else if(scene.models[i].type == "cylinder") {
+            scene.models[i] = drawCylinder(scene.models[i]);
+        } else if(scene.models[i].type == "sphere") {
+            scene.models[i] = drawSphere(scene.models[i]);
         }
+        let verticesTemp = [];
+        for (let j = 0; j < scene.models[i].vertices.length; j++) {
+            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+        }
+        vertices.push(verticesTemp);
+
     }
 
     // Go through all possible edges and take each vertices of the given edges
@@ -118,8 +125,8 @@ function drawScene() {
         for (let j = 0; j < scene.models[i].edges.length; j++) {
             for (let k = 0; k < scene.models[i].edges[j].length-1; k++) {
                 //[0,1,2,3,4]
-                let pt0 = vertices[scene.models[i].edges[j][k]];
-                let pt1 = vertices[scene.models[i].edges[j][k + 1]];
+                let pt0 = vertices[counter][scene.models[i].edges[j][k]];
+                let pt1 = vertices[counter][scene.models[i].edges[j][k + 1]];
                 //create line
                 let line = {pt0, pt1};
                 // Set points (x,y,z,w) values
@@ -161,6 +168,7 @@ function drawScene() {
                 drawLine(x1, y1, x2, y2);
             }
         }
+        counter++;
     }
 
 }
@@ -422,17 +430,7 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
-let modelCube = {
-    "type": "cube",
-    "center": [4, 4, -10],
-    "width": 8,
-    "height": 8,
-    "depth": 8,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-}
+
 
 let modelCone = { 
     "type": "cone",
@@ -470,18 +468,39 @@ let modelSphere = {
     }
 
 }
-let generic = {
-    "type": "generic",
+const generic = {
+    type: "generic",
     vertices: [],
     edges: [],
     matrix: new Matrix(4, 4)
 }
 
-function drawCube(modelCube) {
-    let cube = new generic;
-    cube.vertices.push()
-    cube.edges.push();
 
+
+function drawCube(modelCube) {
+    const cube = Object.create(generic);
+    let center = modelCube.center;
+    let height = modelCube.height;
+    let width = modelCube.width;
+    let depth = modelCube.depth;
+
+    cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]+depth/2, 1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]-depth/2, 1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1],        center[2]-depth/2, 1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1],        center[2]+depth/2, 1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]+depth/2,  1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]-depth/2,  1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
+    console.log(cube.vertices);
+
+    cube.edges.push([0, 1, 2, 3, 0]);
+    cube.edges.push([4, 5, 6, 7, 4]);
+    cube.edges.push([0, 4]);
+    cube.edges.push([1, 5]);
+    cube.edges.push([2, 6]);
+    cube.edges.push([3, 7]);
+    console.log(cube.edges);
     return cube;
 }
 
