@@ -24,6 +24,21 @@
                 "axis": "y",
                 "rps": 0.5
             }
+        },
+        { 
+            "type": "cone",
+            "center": [20,10, -60],
+            "radius": 5,
+            "height": 5,
+            "sides": 100
+        },
+        {
+            "type": "sphere",
+            "center": [-20, 3,-20],
+            "radius": 20,
+            "slices": 100,
+            "stacks": 100
+
         }
     ]
 }

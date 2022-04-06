@@ -82,7 +82,6 @@ class Matrix {
 Matrix.multiply = function(matrices) {
     var i;
     var result = null;
-    console.log(matrices);
     // ensure at least 2 matrices
     if (matrices.length >= 2 && matrices.every((item) => {return item instanceof Matrix;})) {
         result = matrices[0];
