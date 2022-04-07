@@ -61,14 +61,23 @@ function init() {
             //     "center": [0, 30, -40], //doesn't work with 10,0,-20 or 10,25-20
             //     "width": 10,
             //     "height": 10,
-            //     "depth": 10
+            //     "depth": 10,
+            //      "animation": {
+                //         "axis": "y",
+                //         "rps": 0.5
+                //     }
+            
             //  },
             { 
                 "type": "cone",
                 "center": [-30, 30, -10],
                 "radius": 10,
                 "height": 10,
-                "sides": 20
+                "sides": 20,
+                "animation": {
+                             "axis": "y",
+                             "rps": 0.5
+                         }
             },
             // {
             //     "type": "cylinder",
