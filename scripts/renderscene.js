@@ -55,7 +55,7 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            },
+            },  
             // {
             //     "type": 'cube',
             //     "center": [0, 30, -40], //doesn't work with 10,0,-20 or 10,25-20
