@@ -1,14 +1,66 @@
 // create a 4x4 matrix to the parallel projection / view matrix
 function mat4x4Parallel(prp, srp, vup, clip) {
     // 1. translate PRP to origin
-    // 2. rotate VRC such that (u,v,n) align with (x,y,z)
-    // 3. shear such that CW is on the z-axis
-    // 4. translate near clipping plane to origin
-    // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
+    let negPRP = new Vector3(-prp.x, -prp.y, -prp.z);
 
-    // ...
-    // let transform = Matrix.multiply([...]);
-    // return transform;
+    let translate = new Matrix(4, 4);
+    mat4x4Identity(translate);
+    // This line is equivalent to T(-prp);
+    Mat4x4Translate(translate, negPRP.x, negPRP.y, negPRP.z);
+    
+    // 2. rotate VRC such that (u,v,n) align with (x,y,z)
+    let n = prp.subtract(srp);
+    n.normalize();
+
+    let u = vup.cross(n);
+    u.normalize();
+
+    let v = n.cross(u);
+
+    let rotate = new Matrix(4, 4);
+    mat4x4Identity(rotate);
+    mat4x4PerspectiveRotate(rotate, u, v, n);
+
+    // 3. shear such that CW is on the z-axis
+    let left = clip[0];
+    let right = clip[1];
+    let bottom = clip[2];
+    let top = clip[3];
+    let near = clip[4];
+    let far = clip[5];
+
+    let CW = new Vector3(((left + right) / 2), ((bottom + top) / 2), -near);
+    let DOP = CW;
+
+    let shx = (-DOP.x/DOP.z);
+    let shy = (-DOP.y/DOP.z);
+
+    let shear = new Matrix(4, 4);
+    mat4x4Identity(shear);
+    Mat4x4ShearXY(shear, shx, shy);
+
+    // 4. translate near clipping plane to origin
+    let tpar = new Matrix(4, 4);
+    mat4x4Identity(tpar);
+    mat4x4Translate(tpar, 0, 0, near);
+
+    // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
+    let Sper = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
+    let scale = new Matrix(4, 4);
+    mat4x4Identity(scale);
+    mat4x4Scale(scale, Sper.x, Sper.y, Sper.z);
+
+    // Create an array of Matrices
+    let matrices = new Array();
+    matrices.push(scale);
+    matrices.push(tpar);
+    matrices.push(shear);
+    matrices.push(rotate);
+    matrices.push(translate);
+
+    // Multiply the array of matrices and solve for nPer
+    let transform = Matrix.multiply(matrices);
+    return transform;
 }
 
 // create a 4x4 matrix to the perspective projection / view matrix
@@ -98,6 +150,7 @@ function mat4x4MPer() {
 // 4x4 Transform Matrices                                                         //
 ///////////////////////////////////////////////////////////////////////////////////
 
+// set value of an existing 4x4 matrix to convert to world coordinate.
 function mat4x4ProjectionToWindow(mat4x4, w, h) {
     mat4x4.values = [[w/2,   0, 0, w/2],
                      [0,   h/2, 0, h/2],
