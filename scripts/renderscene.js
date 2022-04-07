@@ -58,7 +58,7 @@ function init() {
             },  
             {
                 "type": 'cube',
-                "center": [0, 30, -40], //doesn't work with 10,0,-20 or 10,25-20
+                "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
                 "width": 10,
                 "height": 10,
                 "depth": 10,
@@ -121,12 +121,9 @@ function animate(timestamp) {
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
     // For each model, for each edge
-    var nPer = null;
-    if (scene.view.type == "perspective") {
-        nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-    } else if (scene.view.type == "parallel") {
-        nPer = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-    }
+    
+    var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+    
 
     let vertices = []; // array of all vertices that is multiplied by nPer and mPer
     let counter =0;
@@ -174,7 +171,11 @@ function drawScene() {
                 line.pt1.w = pt1.data[3];
 
                 // Clip the line
+                
                 line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
+                
+                    
+                
 
                 // Set points to be a vector that contain the newly clipped values
                 pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
