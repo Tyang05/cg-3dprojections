@@ -98,58 +98,59 @@ function drawScene() {
            // vertices[j] = scene.models[i].vertices[j].mult(matrix);
          //  console.log(vertices[j]);
         }
-    }
 
-    // Go through all possible edges and take each vertices of the given edges
-    // to clip and draw them onto the scene.
-    for (let i = 0; i < scene.models.length; i++){
-        for (let j = 0; j < scene.models[i].edges.length; j++) {
-            for (let k = 0; k < scene.models[i].edges[j].length-1; k++) {
-                //[0,1,2,3,4]
-                let pt0 = vertices[scene.models[i].edges[j][k]];
-                let pt1 = vertices[scene.models[i].edges[j][k + 1]];
-                //create line
-                let line = {pt0, pt1};
-                // Set points (x,y,z,w) values
-                line.pt0.x = pt0.data[0];
-                line.pt0.y = pt0.data[1];
-                line.pt0.z = pt0.data[2];
-                line.pt0.w = pt0.data[3];
+        // Go through all possible edges and take each vertices of the given edges
+        // to clip and draw them onto the scene.
+        for (let i = 0; i < scene.models.length; i++){
+            for (let j = 0; j < scene.models[i].edges.length; j++) {
+                for (let k = 0; k < scene.models[i].edges[j].length-1; k++) {
+                    //[0,1,2,3,4]
+                    let pt0 = vertices[scene.models[i].edges[j][k]];
+                    let pt1 = vertices[scene.models[i].edges[j][k + 1]];
+                    //create line
+                    let line = {pt0, pt1};
+                    // Set points (x,y,z,w) values
+                    line.pt0.x = pt0.data[0];
+                    line.pt0.y = pt0.data[1];
+                    line.pt0.z = pt0.data[2];
+                    line.pt0.w = pt0.data[3];
 
-                line.pt1.x = pt1.data[0];
-                line.pt1.y = pt1.data[1];
-                line.pt1.z = pt1.data[2];
-                line.pt1.w = pt1.data[3];
+                    line.pt1.x = pt1.data[0];
+                    line.pt1.y = pt1.data[1];
+                    line.pt1.z = pt1.data[2];
+                    line.pt1.w = pt1.data[3];
 
-                // Clip the line
-                line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
+                    // Clip the line
+                    line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
 
-                // Set points to be a vector that contain the newly clipped values
-                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
-                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+                    // Set points to be a vector that contain the newly clipped values
+                    pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
+                    pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
 
-                // Multiply the points by mPer (turn into view scene)
-                let mPer = mat4x4MPer();
-                pt0 = mPer.mult(pt0);
-                pt1 = mPer.mult(pt1);
+                    // Multiply the points by mPer (turn into view scene)
+                    let mPer = mat4x4MPer();
+                    pt0 = mPer.mult(pt0);
+                    pt1 = mPer.mult(pt1);
 
-                // Convert points to to World Coordinate
-                let viewToWorld = new Matrix(4,4);
-                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
-                pt0 = viewToWorld.mult(pt0);
-                pt1 = viewToWorld.mult(pt1);
+                    // Convert points to to World Coordinate
+                    let viewToWorld = new Matrix(4,4);
+                    mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                    pt0 = viewToWorld.mult(pt0);
+                    pt1 = viewToWorld.mult(pt1);
 
-                // Define points values to draw
-                let x1 = pt0.data[0] / pt0.data[3];
-                let y1 = pt0.data[1] / pt0.data[3]
-                let x2 = pt1.data[0] / pt1.data[3];
-                let y2 = pt1.data[1] / pt1.data[3]
+                    // Define points values to draw
+                    let x1 = pt0.data[0] / pt0.data[3];
+                    let y1 = pt0.data[1] / pt0.data[3]
+                    let x2 = pt1.data[0] / pt1.data[3];
+                    let y2 = pt1.data[1] / pt1.data[3]
 
-                // Draw the line
-                drawLine(x1, y1, x2, y2);
+                    // Draw the line
+                    drawLine(x1, y1, x2, y2);
+                }
             }
         }
     }
+
 
 }
 
@@ -327,6 +328,12 @@ function clipLinePerspective(line, z_min) {
 
 // Called when user presses a key on the keyboard down 
 function onKeyDown(event) {
+    let n = scene.view.prp.subtract(scene.view.srp);
+    n.normalize();
+    let u = scene.view.vup.cross(n);
+    u.normalize();
+    console.log(u);
+    let v = n.cross(u);
 
     switch (event.keyCode) {
         case 37: // LEFT Arrow
@@ -337,11 +344,18 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
+            u.data[0] -= 0.025;
+            u.data[1] -= 0.025;
+            u.data[2] -= 0.025;
+            console.log(u);
             scene.view.prp.x -= 2;
             scene.view.srp.x -= 2;
             break;
         case 68: // D key
             console.log("D");
+            u.data[0] += 0.025;
+            u.data[1] += 0.025;
+            u.data[2] += 0.025;
             scene.view.prp.x += 2;
             scene.view.srp.x += 2;
             break;
