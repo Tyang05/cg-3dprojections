@@ -55,6 +55,13 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
+            },
+            {
+                "type": 'cube',
+                "center": [-10, 30, -40],
+                "width": 10,
+                "height": 10,
+                "depth": 10
             }
         ]
     };
@@ -89,16 +96,26 @@ function drawScene() {
     // For each model, for each edge
     let nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
     let vertices = []; // array of all vertices that is multiplied by nPer and mPer
-    
+    let counter =0;
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
-        for (let j = 0; j < scene.models[i].vertices.length; j++) {
-            vertices[j] = nPer.mult(scene.models[i].vertices[j]);
-           // vertices[j] = scene.models[i].vertices[j].mult(matrix);
-         //  console.log(vertices[j]);
+        //These if statements are converting models of specific types into generic models that hold their edges and verticies
+        //Functions being called are at the bottom of this file
+        if(scene.models[i].type == "cube") {
+            scene.models[i] = drawCube(scene.models[i]);
+        } else if(scene.models[i].type == "cone") {
+            scene.models[i] = drawCone(scene.models[i]);
+        } else if(scene.models[i].type == "cylinder") {
+            scene.models[i] = drawCylinder(scene.models[i]);
+        } else if(scene.models[i].type == "sphere") {
+            scene.models[i] = drawSphere(scene.models[i]);
         }
-
+        let verticesTemp = [];
+        for (let j = 0; j < scene.models[i].vertices.length; j++) {
+            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+        }
+      
         // Go through all possible edges and take each vertices of the given edges
         // to clip and draw them onto the scene.
         for (let i = 0; i < scene.models.length; i++){
@@ -147,8 +164,12 @@ function drawScene() {
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
                 }
-            }
-        }
+        vertices.push(verticesTemp);
+
+    }
+
+    
+        counter++;
     }
 
 
@@ -421,4 +442,111 @@ function drawLine(x1, y1, x2, y2) {
     ctx.fillStyle = '#FF0000';
     ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
     ctx.fillRect(x2 - 2, y2 - 2, 4, 4);
+}
+
+
+
+
+let modelCone = { 
+    "type": "cone",
+    "center": [20,10, -60],
+    "radius": 5,
+    "height": 5,
+    "sides": 100,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
+}
+
+let modelCylinder = {
+    "type": "cylinder",
+    "center": [12, 10, -49],
+    "radius": 1.5,
+    "height": 5,
+    "sides": 12,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
+}
+
+let modelSphere = {
+    "type": "sphere",
+    "center": [-20, 3,-20],
+    "radius": 20,
+    "slices": 100,
+    "stacks": 100,
+    "animation": {
+        "axis": "y",
+        "rps": 0.5
+    }
+
+}
+const generic = {
+    type: "generic",
+    vertices: [],
+    edges: [],
+    matrix: new Matrix(4, 4)
+}
+
+
+
+function drawCube(modelCube) {
+    const cube = Object.create(generic);
+    let center = modelCube.center;
+    let height = modelCube.height;
+    let width = modelCube.width;
+    let depth = modelCube.depth;
+
+    cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]+depth/2, 1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]-depth/2, 1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1],        center[2]-depth/2, 1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1],        center[2]+depth/2, 1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]+depth/2,  1));
+    cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]-depth/2,  1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
+    cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
+    console.log(cube.vertices);
+
+    cube.edges.push([0, 1, 2, 3, 0]);
+    cube.edges.push([4, 5, 6, 7, 4]);
+    cube.edges.push([0, 4]);
+    cube.edges.push([1, 5]);
+    cube.edges.push([2, 6]);
+    cube.edges.push([3, 7]);
+    console.log(cube.edges);
+    return cube;
+}
+
+function drawCone(modelCone) {
+    //draw circle with 'sides' number of edges (on xz axis, not xy)
+    //draw one point at center + height
+    //connect top point with each of the circle's verticies 
+    let cone = new generic;
+    cone.vertices.push;
+    cone.edges.push;
+
+    return cone;
+
+}
+
+function drawCylinder(modelCylinder) {
+    //draw two circles (xz plane) 
+    //draw lines connecting each vertex in the circle
+    let cylinder = new generic;
+    cylinder.vertices.push;
+    cylinder.edges.push;
+
+    return cylinder;
+}
+
+function drawSphere(modelSphere) {
+    //draw the same circle but rotate 360/ slices degrees for longitudinal lines and then connect each edge for latitudinal line every 180/stacks degrees   
+    let sphere = new generic;
+    sphere.vertices.push;
+    sphere.edges.push;
+
+    return sphere;
+
 }
