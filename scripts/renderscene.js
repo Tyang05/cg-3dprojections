@@ -68,17 +68,17 @@ function init() {
                     }
             
             },
-            // { 
-            //     "type": "cone",
-            //     "center": [-30, 30, -10],
-            //     "radius": 10,
-            //     "height": 10,
-            //     "sides": 100,
-            //     "animation": {
-            //                  "axis": "y",
-            //                  "rps": 0.5
-            //              }
-            // },
+            { 
+                "type": "cone",
+                "center": [-30, 30, -10],
+                "radius": 10,
+                "height": 10,
+                "sides": 100,
+                "animation": {
+                             "axis": "y",
+                             "rps": 0.5
+                         }
+            },
             // {
             //     "type": "cylinder",
             //     "center": [-30, 20, -10],
