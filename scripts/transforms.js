@@ -98,6 +98,7 @@ function mat4x4MPer() {
 // 4x4 Transform Matrices                                                         //
 ///////////////////////////////////////////////////////////////////////////////////
 
+// set value of an existing 4x4 matrix to convert to world coordinate.
 function mat4x4ProjectionToWindow(mat4x4, w, h) {
     mat4x4.values = [[w/2,   0, 0, w/2],
                      [0,   h/2, 0, h/2],
