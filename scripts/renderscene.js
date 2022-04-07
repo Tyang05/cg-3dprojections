@@ -548,5 +548,5 @@ function drawSphere(modelSphere) {
     sphere.edges.push;
 
     return sphere;
-
+}
 }
