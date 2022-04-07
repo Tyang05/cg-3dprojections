@@ -34,7 +34,7 @@ function init() {
             {
                 type: 'generic',
                 vertices: [
-                    Vector4( 0,  0, -30, 1), // 0
+                    Vector4( 0,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
                     Vector4(20,  0, -30, 1), // 1
                     Vector4(20, 12, -30, 1), // 2
                     Vector4(10, 20, -30, 1), // 3
@@ -56,13 +56,31 @@ function init() {
                 ],
                 matrix: new Matrix(4, 4)
             },
-            {
-                "type": 'cube',
-                "center": [-10, 30, -40],
-                "width": 10,
+            // {
+            //     "type": 'cube',
+            //     "center": [0, 30, -40], //doesn't work with 10,0,-20 or 10,25-20
+            //     "width": 10,
+            //     "height": 10,
+            //     "depth": 10
+            //  },
+            { 
+                "type": "cone",
+                "center": [-30, 30, -10],
+                "radius": 10,
                 "height": 10,
-                "depth": 10
-            }
+                "sides": 20
+            },
+            // {
+            //     "type": "cylinder",
+            //     "center": [-30, 35, -10],
+            //     "radius": 5,
+            //     "height": 10,
+            //     "sides": 20,
+            //     "animation": {
+            //         "axis": "y",
+            //         "rps": 0.5
+            //     }
+            // }
         ]
     };
 
@@ -430,9 +448,9 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
+//references
 
-
-let modelCone = { 
+const modelCone = { 
     "type": "cone",
     "center": [20,10, -60],
     "radius": 5,
@@ -444,7 +462,7 @@ let modelCone = {
     }
 }
 
-let modelCylinder = {
+const modelCylinder = {
     "type": "cylinder",
     "center": [12, 10, -49],
     "radius": 1.5,
@@ -456,7 +474,7 @@ let modelCylinder = {
     }
 }
 
-let modelSphere = {
+const modelSphere = {
     "type": "sphere",
     "center": [-20, 3,-20],
     "radius": 20,
@@ -468,6 +486,9 @@ let modelSphere = {
     }
 
 }
+
+//Constant object that gets returned
+
 const generic = {
     type: "generic",
     vertices: [],
@@ -516,14 +537,100 @@ function drawCone(modelCone) {
 
 }
 
-function drawCylinder(modelCylinder) {
-    //draw two circles (xz plane) 
-    //draw lines connecting each vertex in the circle
-    let cylinder = new generic;
-    cylinder.vertices.push;
-    cylinder.edges.push;
+function drawCone(modelCone) {
+    const model = Object.create(generic);
+    var n = modelCone.sides;
+    var center = modelCone.center;
+    var radius = modelCone.radius;
+    var height = modelCone.height;
 
-    return cylinder;
+    //Top Point
+    model.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
+
+    for(var i=0; i<n; i++) {
+        // Each computed Cartesian x,y variable  
+        var radian = this.degreesToRadians((360/n)*i);
+        // Each computed Cartesian x,y variable  
+        var x0 = (center[0] + radius * Math.cos(radian));
+        var z0 = (center[2] + radius * Math.sin(radian));
+
+        radian = this.degreesToRadians((360/n)*(i+1));
+
+        var x1 = (center[0] + radius * Math.cos(radian));
+        var z1 = (center[2] + radius * Math.sin(radian));
+        
+        var p0 = Vector4(x0, center[1], z0, 1);
+        var p1 = Vector4(x1, center[1], z1, 1);
+        model.vertices.push(p0);
+        if (i == n-1) {
+            model.vertices.push(p1);
+        }
+    }
+
+    //Connect each point of the circle to the next point 
+    //Connect each point to the point on top
+    for (var i=0; i<model.vertices.length; i++) {
+        var circleArray = [i+1, i+2];
+        var coneArray = [0, i+1];
+
+        model.edges.push(circleArray);
+        model.edges.push(coneArray);
+    }
+    //Connect the first to the last point
+    var circleArray = [0, model.vertices.length];
+
+    return model;
+}
+
+function degreesToRadians(degrees) {
+    return degrees* Math.PI /180;
+}
+
+function drawCylinder(modelCylinder) {
+    const model = Object.create(generic);
+    var n = modelCylinder.sides;
+    var center = modelCylinder.center;
+    var radius = modelCylinder.radius;
+    var height = modelCylinder.height;
+
+    
+    for(var i=0; i<n; i++) {
+        // Each computed Cartesian x,y variable  
+        var radian = this.degreesToRadians((360/n)*i);
+        // Each computed Cartesian x,y variable  
+        var x0 = (center[0] + radius * Math.cos(radian));
+        var z0 = (center[2] + radius * Math.sin(radian));
+
+        radian = this.degreesToRadians((360/n)*(i+1));
+
+        
+        var p0 = Vector4(x0, center[1]-height/2, z0, 1);
+        //var p1 = Vector4(x1, center[1], z1, 1);
+
+        var p1 = Vector4(x0, center[1]+height/2, z0, 1);
+        //var p3 = Vector4(x1, center[1]+height, z1, 1);
+        
+        
+        model.vertices.push(p0);
+        model.vertices.push(p1);
+    }
+
+    //Connect each point of the circle to the next point 
+    //Connect each point to the point on top
+    for (var i=0; i<model.vertices.length; i++) {
+        
+        var circleArray = [i, (i+2)%model.vertices.length];
+        if (i%2 == 0) {
+            var linesArray = [i, i+1];
+        }
+        
+        model.edges.push(circleArray);
+        model.edges.push(linesArray);
+    }
+    //Connect the first to the last point
+    
+
+    return model;
 }
 
 function drawSphere(modelSphere) {
