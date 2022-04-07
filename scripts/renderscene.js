@@ -55,35 +55,35 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            },
-            // {
-            //     "type": 'cube',
-            //     "center": [0, 30, -40], //doesn't work with 10,0,-20 or 10,25-20
-            //     "width": 10,
-            //     "height": 10,
-            //     "depth": 10,
-            //      "animation": {
-                //         "axis": "y",
-                //         "rps": 0.5
-                //     }
-            
-            //  },
-            { 
-                "type": "cone",
-                "center": [-30, 30, -10],
-                "radius": 10,
+            },  
+            {
+                "type": 'cube',
+                "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+                "width": 10,
                 "height": 10,
-                "sides": 20,
-                "animation": {
-                             "axis": "y",
-                             "rps": 0.5
-                         }
+                "depth": 10,
+                 "animation": {
+                        "axis": "y",
+                        "rps": 0.5
+                    }
+            
             },
+            // { 
+            //     "type": "cone",
+            //     "center": [-30, 30, -10],
+            //     "radius": 10,
+            //     "height": 10,
+            //     "sides": 100,
+            //     "animation": {
+            //                  "axis": "y",
+            //                  "rps": 0.5
+            //              }
+            // },
             // {
             //     "type": "cylinder",
-            //     "center": [-30, 35, -10],
+            //     "center": [-30, 20, -10],
             //     "radius": 5,
-            //     "height": 10,
+            //     "height": 20,
             //     "sides": 20,
             //     "animation": {
             //         "axis": "y",
@@ -121,7 +121,10 @@ function animate(timestamp) {
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
     // For each model, for each edge
-    let nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+    
+    var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+    
+
     let vertices = []; // array of all vertices that is multiplied by nPer and mPer
     let counter =0;
     // For loop iterate and access all the given vertices
@@ -168,7 +171,11 @@ function drawScene() {
                 line.pt1.w = pt1.data[3];
 
                 // Clip the line
+                
                 line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
+                
+                    
+                
 
                 // Set points to be a vector that contain the newly clipped values
                 pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
@@ -459,30 +466,6 @@ function drawLine(x1, y1, x2, y2) {
 
 //references
 
-const modelCone = { 
-    "type": "cone",
-    "center": [20,10, -60],
-    "radius": 5,
-    "height": 5,
-    "sides": 100,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-}
-
-const modelCylinder = {
-    "type": "cylinder",
-    "center": [12, 10, -49],
-    "radius": 1.5,
-    "height": 5,
-    "sides": 12,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-}
-
 const modelSphere = {
     "type": "sphere",
     "center": [-20, 3,-20],
@@ -522,7 +505,6 @@ function drawCube(modelCube) {
     cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
-    console.log(cube.vertices);
 
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
@@ -530,21 +512,9 @@ function drawCube(modelCube) {
     cube.edges.push([1, 5]);
     cube.edges.push([2, 6]);
     cube.edges.push([3, 7]);
-    console.log(cube.edges);
     return cube;
 }
 
-function drawCone(modelCone) {
-    //draw circle with 'sides' number of edges (on xz axis, not xy)
-    //draw one point at center + height
-    //connect top point with each of the circle's verticies 
-    let cone = new generic;
-    cone.vertices.push;
-    cone.edges.push;
-
-    return cone;
-
-}
 
 function drawCone(modelCone) {
     const model = Object.create(generic);
@@ -628,7 +598,7 @@ function drawCylinder(modelCylinder) {
     //Connect each point to the point on top
     for (var i=0; i<model.vertices.length; i++) {
         
-        var circleArray = [i, (i+2)%model.vertices.length];
+        var circleArray = [i, (i+2) % model.vertices.length];
         if (i%2 == 0) {
             var linesArray = [i, i+1];
         }
@@ -651,3 +621,4 @@ function drawSphere(modelSphere) {
     return sphere;
 
 }
+
