@@ -68,28 +68,28 @@ function init() {
                     }
             
             },
-            // { 
-            //     "type": "cone",
-            //     "center": [-30, 30, -10],
-            //     "radius": 10,
-            //     "height": 10,
-            //     "sides": 100,
-            //     "animation": {
-            //                  "axis": "y",
-            //                  "rps": 0.5
-            //              }
-            // },
-            // {
-            //     "type": "cylinder",
-            //     "center": [-30, 20, -10],
-            //     "radius": 5,
-            //     "height": 20,
-            //     "sides": 20,
-            //     "animation": {
-            //         "axis": "y",
-            //         "rps": 0.5
-            //     }
-            // }
+            { 
+                "type": "cone",
+                "center": [-30, 30, -10],
+                "radius": 10,
+                "height": 10,
+                "sides": 20,
+                "animation": {
+                             "axis": "y",
+                             "rps": 0.5
+                         }
+            },
+            {
+                "type": "cylinder",
+                "center": [-30, 20, -10],
+                "radius": 5,
+                "height": 20,
+                "sides": 20,
+                "animation": {
+                    "axis": "y",
+                    "rps": 0.5
+                }
+            }
         ]
     };
 
@@ -481,7 +481,7 @@ const modelSphere = {
 
 //Constant object that gets returned
 
-const generic = {
+var generic = {
     type: "generic",
     vertices: [],
     edges: [],
@@ -492,10 +492,14 @@ const generic = {
 
 function drawCube(modelCube) {
     const cube = Object.create(generic);
+    cube.vertices = [];
+    cube.edges = [];
+    console.log(cube.vertices);
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
     let depth = modelCube.depth;
+
 
     cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]+depth/2, 1));
     cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]-depth/2, 1));
@@ -517,7 +521,14 @@ function drawCube(modelCube) {
 
 
 function drawCone(modelCone) {
+
     const model = Object.create(generic);
+    model.vertices = [];
+    model.edges = [];
+    model.matrix= new Matrix(4, 4);
+
+    
+    console.log(model.vertices);
     var n = modelCone.sides;
     var center = modelCone.center;
     var radius = modelCone.radius;
@@ -567,6 +578,10 @@ function degreesToRadians(degrees) {
 
 function drawCylinder(modelCylinder) {
     const model = Object.create(generic);
+    model.vertices = [];
+    model.edges = [];
+    model.matrix= new Matrix(4, 4);
+
     var n = modelCylinder.sides;
     var center = modelCylinder.center;
     var radius = modelCylinder.radius;
