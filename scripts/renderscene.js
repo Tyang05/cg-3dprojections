@@ -264,7 +264,86 @@ function clipLineParallel(line) {
     let out1 = outcodeParallel(p1);
     
     // TODO: implement clipping here!
+    while(true) {
+        //Case 1: Trival Accept
+        if((out0 | out1) == 0) {
+            result = line;
+            break;
+        }
+        // Case 2: Trivial Reject. Return null
+        else if((out0 & out1) != 0) {
+            return null;
+        } else {
+            let outcode = null;
+            if (out0 != 0) {
+                outcode = out0;
+            } else {
+                outcode = out1;
+            }
+            //console.log(outcode);
 
+            /* BOUNDS: 
+            LEFT: x = -1, RIGHT: x = 1
+            BOTTOM: y = -1, TOP: y = 1
+            FAR: z = -1, NEAR z = 0
+            */
+            let x,y,z,t = null;
+            let dx = p1.x - p0.x;
+            let dy = p1.y - p0.y;
+            let dz = p1.z - p0.z;
+
+            if (outcode & LEFT) {
+                console.log("Clip Parallel Left");
+                x = -1;
+                y = p0.y + ((x - p0.x) * dy) / dx;
+                z = p0.z + ((x - p0.x) * dz) / dx;
+            } else if (outcode & RIGHT) {
+                console.log("Clip Parallel Right");
+                x = 1;
+                y = p0.y + ((x - p0.x) * dy) / dx;
+                z = p0.z + ((x - p0.x) * dz) / dx;
+            } else if (outcode & BOTTOM) {
+                console.log("Clip Parallel Bottom");
+                y = -1;
+                x = p0.x + ((y - p0.y) * dx) / dy;
+                z = p0.z + ((y - p0.y) * dz) / dy;
+            } else if (outcode & TOP) {
+                console.log("Clip Parallel Top");
+                y = 1;
+                x = p0.x + ((y - p0.y) * dx) / dy;
+                z = p0.z + ((y - p0.y) * dz) / dy;
+            } else if (outcode & FAR) {
+                console.log("Clip Parallel Far");
+                z = -1;
+                y = p0.y + ((z - p0.z) * dy) / dz;
+                x = p0.x + ((z - p0.z) * dx) / dz;
+            } else if (outcode & NEAR) {
+                console.log("Clip Parallel Near");
+                z = 0;
+                y = p0.y + ((z - p0.z) * dy) / dz;
+                x = p0.x + ((z - p0.z) * dx) / dz;
+            }
+
+            if(outcode == out0) {
+                p0.x = x;
+                p0.y = y;
+                p0.z = z;
+                out0 = outcodeParallel(p0);
+            }
+
+            // Else, it do the same but for out1
+            else {
+                p1.x = x;
+                p1.y = y;
+                p1.z = z;
+                out1 = outcodeParallel(p1);
+            }
+
+            line.pt0 = p0;
+            line.pt1 = p1;
+            result = line;
+        }
+    }
     return result;
 }
 
@@ -636,4 +715,3 @@ function drawSphere(modelSphere) {
     return sphere;
 
 }
-
