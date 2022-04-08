@@ -121,7 +121,9 @@ function animate(timestamp) {
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
     // For each model, for each edge
+    
     var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+    
 
     let vertices = []; // array of all vertices that is multiplied by nPer and mPer
     let counter =0;
@@ -262,86 +264,7 @@ function clipLineParallel(line) {
     let out1 = outcodeParallel(p1);
     
     // TODO: implement clipping here!
-    while(true) {
-        //Case 1: Trival Accept
-        if((out0 | out1) == 0) {
-            result = line;
-            break;
-        }
-        // Case 2: Trivial Reject. Return null
-        else if((out0 & out1) != 0) {
-            return null;
-        } else {
-            let outcode = null;
-            if (out0 != 0) {
-                outcode = out0;
-            } else {
-                outcode = out1;
-            }
-            //console.log(outcode);
 
-            /* BOUNDS: 
-            LEFT: x = -1, RIGHT: x = 1
-            BOTTOM: y = -1, TOP: y = 1
-            FAR: z = -1, NEAR z = 0
-            */
-            let x,y,z,t = null;
-            let dx = p1.x - p0.x;
-            let dy = p1.y - p0.y;
-            let dz = p1.z - p0.z;
-
-            if (outcode & LEFT) {
-                console.log("Clip Parallel Left");
-                x = -1;
-                y = p0.y + ((x - p0.x) * dy) / dx;
-                z = p0.z + ((x - p0.x) * dz) / dx;
-            } else if (outcode & RIGHT) {
-                console.log("Clip Parallel Right");
-                x = 1;
-                y = p0.y + ((x - p0.x) * dy) / dx;
-                z = p0.z + ((x - p0.x) * dz) / dx;
-            } else if (outcode & BOTTOM) {
-                console.log("Clip Parallel Bottom");
-                y = -1;
-                x = p0.x + ((y - p0.y) * dx) / dy;
-                z = p0.z + ((y - p0.y) * dz) / dy;
-            } else if (outcode & TOP) {
-                console.log("Clip Parallel Top");
-                y = 1;
-                x = p0.x + ((y - p0.y) * dx) / dy;
-                z = p0.z + ((y - p0.y) * dz) / dy;
-            } else if (outcode & FAR) {
-                console.log("Clip Parallel Far");
-                z = -1;
-                y = p0.y + ((z - p0.z) * dy) / dz;
-                x = p0.x + ((z - p0.z) * dx) / dz;
-            } else if (outcode & NEAR) {
-                console.log("Clip Parallel Near");
-                z = 0;
-                y = p0.y + ((z - p0.z) * dy) / dz;
-                x = p0.x + ((z - p0.z) * dx) / dz;
-            }
-
-            if(outcode == out0) {
-                p0.x = x;
-                p0.y = y;
-                p0.z = z;
-                out0 = outcodeParallel(p0);
-            }
-
-            // Else, it do the same but for out1
-            else {
-                p1.x = x;
-                p1.y = y;
-                p1.z = z;
-                out1 = outcodeParallel(p1);
-            }
-
-            line.pt0 = p0;
-            line.pt1 = p1;
-            result = line;
-        }
-    }
     return result;
 }
 
@@ -458,12 +381,6 @@ function clipLinePerspective(line, z_min) {
 
 // Called when user presses a key on the keyboard down 
 function onKeyDown(event) {
-    let n = scene.view.prp.subtract(scene.view.srp);
-    n.normalize();
-    let u = scene.view.vup.cross(n);
-    u.normalize();
-    console.log(u);
-    let v = n.cross(u);
 
     switch (event.keyCode) {
         case 37: // LEFT Arrow
@@ -474,18 +391,11 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
-            u.data[0] -= 0.025;
-            u.data[1] -= 0.025;
-            u.data[2] -= 0.025;
-            console.log(u);
             scene.view.prp.x -= 2;
             scene.view.srp.x -= 2;
             break;
         case 68: // D key
             console.log("D");
-            u.data[0] += 0.025;
-            u.data[1] += 0.025;
-            u.data[2] += 0.025;
             scene.view.prp.x += 2;
             scene.view.srp.x += 2;
             break;
@@ -554,33 +464,9 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
+//references
 
-
-let modelCone = { 
-    "type": "cone",
-    "center": [20,10, -60],
-    "radius": 5,
-    "height": 5,
-    "sides": 100,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-}
-
-let modelCylinder = {
-    "type": "cylinder",
-    "center": [12, 10, -49],
-    "radius": 1.5,
-    "height": 5,
-    "sides": 12,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-}
-
-let modelSphere = {
+const modelSphere = {
     "type": "sphere",
     "center": [-20, 3,-20],
     "radius": 20,
@@ -592,7 +478,10 @@ let modelSphere = {
     }
 
 }
-const generic = {
+
+//Constant object that gets returned
+
+var generic = {
     type: "generic",
     vertices: [],
     edges: [],
@@ -603,10 +492,14 @@ const generic = {
 
 function drawCube(modelCube) {
     const cube = Object.create(generic);
+    cube.vertices = [];
+    cube.edges = [];
+    console.log(cube.vertices);
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
     let depth = modelCube.depth;
+
 
     cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]+depth/2, 1));
     cube.vertices.push(Vector4(center[0]+width/2, center[1],        center[2]-depth/2, 1));
@@ -616,7 +509,6 @@ function drawCube(modelCube) {
     cube.vertices.push(Vector4(center[0]+width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
-    console.log(cube.vertices);
 
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
@@ -624,30 +516,115 @@ function drawCube(modelCube) {
     cube.edges.push([1, 5]);
     cube.edges.push([2, 6]);
     cube.edges.push([3, 7]);
-    console.log(cube.edges);
     return cube;
 }
 
+
 function drawCone(modelCone) {
-    //draw circle with 'sides' number of edges (on xz axis, not xy)
-    //draw one point at center + height
-    //connect top point with each of the circle's verticies 
-    let cone = new generic;
-    cone.vertices.push;
-    cone.edges.push;
 
-    return cone;
+    const model = Object.create(generic);
+    model.vertices = [];
+    model.edges = [];
+    model.matrix= new Matrix(4, 4);
 
+    
+    console.log(model.vertices);
+    var n = modelCone.sides;
+    var center = modelCone.center;
+    var radius = modelCone.radius;
+    var height = modelCone.height;
+
+    //Top Point
+    model.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
+
+    for(var i=0; i<n; i++) {
+        // Each computed Cartesian x,y variable  
+        var radian = this.degreesToRadians((360/n)*i);
+        // Each computed Cartesian x,y variable  
+        var x0 = (center[0] + radius * Math.cos(radian));
+        var z0 = (center[2] + radius * Math.sin(radian));
+
+        radian = this.degreesToRadians((360/n)*(i+1));
+
+        var x1 = (center[0] + radius * Math.cos(radian));
+        var z1 = (center[2] + radius * Math.sin(radian));
+        
+        var p0 = Vector4(x0, center[1], z0, 1);
+        var p1 = Vector4(x1, center[1], z1, 1);
+        model.vertices.push(p0);
+        if (i == n-1) {
+            model.vertices.push(p1);
+        }
+    }
+
+    //Connect each point of the circle to the next point 
+    //Connect each point to the point on top
+    for (var i=0; i<model.vertices.length; i++) {
+        var circleArray = [i+1, i+2];
+        var coneArray = [0, i+1];
+
+        model.edges.push(circleArray);
+        model.edges.push(coneArray);
+    }
+    //Connect the first to the last point
+    var circleArray = [0, model.vertices.length];
+
+    return model;
+}
+
+function degreesToRadians(degrees) {
+    return degrees* Math.PI /180;
 }
 
 function drawCylinder(modelCylinder) {
-    //draw two circles (xz plane) 
-    //draw lines connecting each vertex in the circle
-    let cylinder = new generic;
-    cylinder.vertices.push;
-    cylinder.edges.push;
+    const model = Object.create(generic);
+    model.vertices = [];
+    model.edges = [];
+    model.matrix= new Matrix(4, 4);
 
-    return cylinder;
+    var n = modelCylinder.sides;
+    var center = modelCylinder.center;
+    var radius = modelCylinder.radius;
+    var height = modelCylinder.height;
+
+    
+    for(var i=0; i<n; i++) {
+        // Each computed Cartesian x,y variable  
+        var radian = this.degreesToRadians((360/n)*i);
+        // Each computed Cartesian x,y variable  
+        var x0 = (center[0] + radius * Math.cos(radian));
+        var z0 = (center[2] + radius * Math.sin(radian));
+
+        radian = this.degreesToRadians((360/n)*(i+1));
+
+        
+        var p0 = Vector4(x0, center[1]-height/2, z0, 1);
+        //var p1 = Vector4(x1, center[1], z1, 1);
+
+        var p1 = Vector4(x0, center[1]+height/2, z0, 1);
+        //var p3 = Vector4(x1, center[1]+height, z1, 1);
+        
+        
+        model.vertices.push(p0);
+        model.vertices.push(p1);
+    }
+
+    //Connect each point of the circle to the next point 
+    //Connect each point to the point on top
+    for (var i=0; i<model.vertices.length; i++) {
+        
+        var circleArray = [i, (i+2) % model.vertices.length];
+        if (i%2 == 0) {
+            var linesArray = [i, i+1];
+        }
+        
+        model.edges.push(circleArray);
+        model.edges.push(linesArray);
+    }
+    //Connect the first to the last point
+    
+
+    return model;
 }
 
 function drawSphere(modelSphere) {
@@ -657,5 +634,6 @@ function drawSphere(modelSphere) {
     sphere.edges.push;
 
     return sphere;
+
 }
-}
+
