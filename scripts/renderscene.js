@@ -68,12 +68,12 @@ function init() {
                     }
             
             },
-            { 
+            {
                 "type": "cone",
                 "center": [-30, 10, -30],
                 "radius": 10,
-                "height": 100,
-                "sides": 100,
+                "height": 50,
+                "sides": 50,
                 "animation": {
                              "axis": "y",
                              "rps": 0.5
@@ -84,7 +84,7 @@ function init() {
                 "center": [-30, 25, -10],
                 "radius": 5,
                 "height": 40,
-                "sides": 100,
+                "sides": 50,
                 "animation": {
                     "axis": "y",
                     "rps": 0.5
@@ -115,7 +115,7 @@ function animate(timestamp) {
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-    // window.requestAnimationFrame(animate);
+     window.requestAnimationFrame(animate);
 }
 
 // Main drawing code - use information contained in variable `scene`
@@ -125,13 +125,15 @@ function drawScene() {
     var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
     
 
-    let vertices = []; // array of all vertices that is multiplied by nPer and mPer
-    let counter =0;
+    // The vertices array which contains sets of vertices from each individual models.
+    // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
+    let vertices = [];
+    let counter = 0;
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
-        //These if statements are converting models of specific types into generic models that hold their edges and verticies
-        //Functions being called are at the bottom of this file
+        // These if statements are converting models of specific types into generic models that hold their edges and verticies
+        // Functions being called are at the bottom of this file
         if(scene.models[i].type == "cube") {
             scene.models[i] = drawCube(scene.models[i]);
         } else if(scene.models[i].type == "cone") {
@@ -141,42 +143,35 @@ function drawScene() {
         } else if(scene.models[i].type == "sphere") {
             scene.models[i] = drawSphere(scene.models[i]);
         }
+        // The set of vertices for the current model
         let verticesTemp = [];
+        // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
             verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
         }
+        // Add vertices to the verticesTemp
         vertices.push(verticesTemp);
-
     }
-    console.log(scene.models);
 
     // Go through all possible edges and take each vertices of the given edges
     // to clip and draw them onto the scene.
     for (let i = 0; i < scene.models.length; i++){
         for (let j = 0; j < scene.models[i].edges.length; j++) {
             for (let k = 0; k < scene.models[i].edges[j].length-1; k++) {
-                //[0,1,2,3,4]
-                let pt0 = vertices[counter][scene.models[i].edges[j][k]];
-                let pt1 = vertices[counter][scene.models[i].edges[j][k + 1]];
-                //create line
-                let line = {pt0, pt1};
-                // Set points (x,y,z,w) values
-                line.pt0.x = pt0.data[0];
-                line.pt0.y = pt0.data[1];
-                line.pt0.z = pt0.data[2];
-                line.pt0.w = pt0.data[3];
+                // Here, I think we are referencing the actual vertices, so just to be safe,
+                // this is now a reference to the actual vertices (if that is the case)
+                let hold_pt0 = vertices[counter][scene.models[i].edges[j][k]];
+                let hold_pt1 = vertices[counter][scene.models[i].edges[j][k + 1]];
 
-                line.pt1.x = pt1.data[0];
-                line.pt1.y = pt1.data[1];
-                line.pt1.z = pt1.data[2];
-                line.pt1.w = pt1.data[3];
+                // Create the 2 new points with references to hold_pts data.
+                let pt0 = new Vector3(hold_pt0.data[0], hold_pt0.data[1], hold_pt0.data[2]);
+                let pt1 = new Vector3(hold_pt1.data[0], hold_pt1.data[1], hold_pt1.data[2]);
+
+                // Create line
+                let line = {pt0:pt0, pt1:pt1};
 
                 // Clip the line
-                
                 line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
-                
-                    
-                
 
                 // Set points to be a vector that contain the newly clipped values
                 pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
@@ -461,6 +456,13 @@ function clipLinePerspective(line, z_min) {
 
 // Called when user presses a key on the keyboard down 
 function onKeyDown(event) {
+    let n = scene.view.prp.subtract(scene.view.srp);
+    n.normalize();
+
+    let u = scene.view.vup.cross(n);
+    u.normalize();
+
+    let v = n.cross(u);
 
     switch (event.keyCode) {
         case 37: // LEFT Arrow
@@ -471,13 +473,13 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
-            scene.view.prp.x -= 2;
-            scene.view.srp.x -= 2;
+            scene.view.prp = scene.view.prp.add(u);
+            scene.view.srp = scene.view.srp.add(u);
             break;
         case 68: // D key
             console.log("D");
-            scene.view.prp.x += 2;
-            scene.view.srp.x += 2;
+            scene.view.prp = scene.view.prp.subtract(u);
+            scene.view.srp = scene.view.srp.subtract(u);
             break;
         case 83: // S key
             console.log("S");
@@ -576,7 +578,6 @@ function drawCube(modelCube) {
     var cube = generic();
     cube.vertices = [];
     cube.edges = [];
-    console.log(cube.vertices);
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
@@ -592,6 +593,8 @@ function drawCube(modelCube) {
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
 
+    console.log(cube.vertices);
+
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
     cube.edges.push([0, 4]);
@@ -604,34 +607,36 @@ function drawCube(modelCube) {
 
 function drawCone(modelCone) {
 
+    let circleArray;
+    let i;
     var cone = generic();
     cone.vertices = [];
     cone.edges = [];
     cone.matrix= new Matrix(4, 4);
 
-    
-    var n = modelCone.sides;
-    var center = modelCone.center;
-    var radius = modelCone.radius;
-    var height = modelCone.height;
+
+    let n = modelCone.sides;
+    let center = modelCone.center;
+    let radius = modelCone.radius;
+    let height = modelCone.height;
 
     //Top Point
     cone.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
 
-    for(var i=0; i<n; i++) {
+    for(i = 0; i<n; i++) {
         // Each computed Cartesian x,y variable  
-        var radian = this.degreesToRadians((360/n)*i);
+        let radian = this.degreesToRadians((360 / n) * i);
         // Each computed Cartesian x,y variable  
-        var x0 = (center[0] + radius * Math.cos(radian));
-        var z0 = (center[2] + radius * Math.sin(radian));
+        let x0 = (center[0] + radius * Math.cos(radian));
+        let z0 = (center[2] + radius * Math.sin(radian));
 
         radian = this.degreesToRadians((360/n)*(i+1));
 
-        var x1 = (center[0] + radius * Math.cos(radian));
-        var z1 = (center[2] + radius * Math.sin(radian));
-        
-        var p0 = Vector4(x0, center[1], z0, 1);
-        var p1 = Vector4(x1, center[1], z1, 1);
+        let x1 = (center[0] + radius * Math.cos(radian));
+        let z1 = (center[2] + radius * Math.sin(radian));
+
+        let p0 = Vector4(x0, center[1], z0, 1);
+        let p1 = Vector4(x1, center[1], z1, 1);
         cone.vertices.push(p0);
         if (i == n-1) {
             cone.vertices.push(p1);
@@ -640,15 +645,15 @@ function drawCone(modelCone) {
 
     //Connect each point of the circle to the next point 
     //Connect each point to the point on top
-    for (var i=0; i<cone.vertices.length-2; i++) {
-        var circleArray = [i+1, i+2];
-        var coneArray = [0, i+1];
+    for (i = 0; i<cone.vertices.length-2; i++) {
+        circleArray = [i+1, i+2];
+        let coneArray = [0, i + 1];
 
         cone.edges.push(circleArray);
         cone.edges.push(coneArray);
     }
     //Connect the first to the last point
-    var circleArray = [0, cone.vertices.length];
+    circleArray = [0, cone.vertices.length];
 
     return cone;
 }
@@ -668,42 +673,42 @@ function drawCylinder(modelCylinder) {
     var radius = modelCylinder.radius;
     var height = modelCylinder.height;
 
-    
+
     for(var i=0; i<n; i++) {
-        // Each computed Cartesian x,y variable  
+        // Each computed Cartesian x,y variable
         var radian = this.degreesToRadians((360/n)*i);
-        // Each computed Cartesian x,y variable  
+        // Each computed Cartesian x,y variable
         var x0 = (center[0] + radius * Math.cos(radian));
         var z0 = (center[2] + radius * Math.sin(radian));
 
         radian = this.degreesToRadians((360/n)*(i+1));
 
-        
+
         var p0 = Vector4(x0, center[1]-height/2, z0, 1);
         //var p1 = Vector4(x1, center[1], z1, 1);
 
         var p1 = Vector4(x0, center[1]+height/2, z0, 1);
         //var p3 = Vector4(x1, center[1]+height, z1, 1);
-        
-        
+
+
         cylinder.vertices.push(p0);
         cylinder.vertices.push(p1);
     }
 
-    //Connect each point of the circle to the next point 
+    //Connect each point of the circle to the next point
     //Connect each point to the point on top
     for (var i=0; i<cylinder.vertices.length; i++) {
-        
+
         var circleArray = [i, (i+2) % cylinder.vertices.length];
         if (i%2 == 0) {
             var linesArray = [i, i+1];
         }
-        
+
         cylinder.edges.push(circleArray);
         cylinder.edges.push(linesArray);
     }
     //Connect the first to the last point
-    
+
 
     return cylinder;
 }
