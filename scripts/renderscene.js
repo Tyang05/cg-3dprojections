@@ -73,8 +73,8 @@ function init() {
                 "type": "cone",
                 "center": [-30, 10, -30],
                 "radius": 10,
-                "height": 50,
-                "sides": 50,
+                "height": 20,
+                "sides": 10,
                 "animation": {
                              "axis": "y",
                              "rps": 0.5
@@ -84,8 +84,8 @@ function init() {
                 "type": "cylinder",
                 "center": [-30, 25, -10],
                 "radius": 5,
-                "height": 40,
-                "sides": 50,
+                "height": 20,
+                "sides": 10,
                 "animation": {
                     "axis": "y",
                     "rps": 0.5
@@ -180,29 +180,31 @@ function drawPerspective() {
                 // Clip the line
                 line = clipLinePerspective(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
 
-                // Set points to be a vector that contain the newly clipped values
-                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
-                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+                if (line != null) {
+                    // Set points to be a vector that contain the newly clipped values
+                    pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
+                    pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
 
-                // Multiply the points by mPer (turn into view scene)
-                let mPer = mat4x4MPer();
-                pt0 = mPer.mult(pt0);
-                pt1 = mPer.mult(pt1);
+                    // Multiply the points by mPer (turn into view scene)
+                    let mPer = mat4x4MPer();
+                    pt0 = mPer.mult(pt0);
+                    pt1 = mPer.mult(pt1);
 
-                // Convert points to to World Coordinate
-                let viewToWorld = new Matrix(4,4);
-                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
-                pt0 = viewToWorld.mult(pt0);
-                pt1 = viewToWorld.mult(pt1);
+                    // Convert points to to World Coordinate
+                    let viewToWorld = new Matrix(4,4);
+                    mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                    pt0 = viewToWorld.mult(pt0);
+                    pt1 = viewToWorld.mult(pt1);
 
-                // Define points values to draw
-                let x1 = pt0.data[0] / pt0.data[3];
-                let y1 = pt0.data[1] / pt0.data[3]
-                let x2 = pt1.data[0] / pt1.data[3];
-                let y2 = pt1.data[1] / pt1.data[3]
+                    // Define points values to draw
+                    let x1 = pt0.data[0] / pt0.data[3];
+                    let y1 = pt0.data[1] / pt0.data[3]
+                    let x2 = pt1.data[0] / pt1.data[3];
+                    let y2 = pt1.data[1] / pt1.data[3]
 
-                // Draw the line
-                drawLine(x1, y1, x2, y2);
+                    // Draw the line
+                    drawLine(x1, y1, x2, y2);
+                }
             }
         }
         counter++;
@@ -486,7 +488,6 @@ function clipLinePerspective(line, z_min) {
             result = null;
             break;
         } else {
-            // BOUNDS: LEFT = z, RIGHT = -z, BOTTOM y = z, TOP = -z, FAR z = 1, NEAR z = z_min
             let outcode = null;
             let x,y,z = null;
             let t = null;
@@ -553,17 +554,21 @@ function clipLinePerspective(line, z_min) {
             // Check if outcode is out0, if so change out0 to become the new outcode
             // and its p0 to the new (x,y,z)
             if(outcode == out0) {
+                console.log(p0);
                 p0.x = x;
                 p0.y = y;
                 p0.z = z;
+                console.log(p1);
                 out0 = outcodePerspective(p0,z_min);
             }
 
             // Else, it do the same but for out1
             else {
+                console.log(p0);
                 p1.x = x;
                 p1.y = y;
                 p1.z = z;
+                console.log(p1);
                 out1 = outcodePerspective(p1,z_min);
             }
 
@@ -598,21 +603,25 @@ function onKeyDown(event) {
             console.log("A");
             scene.view.prp = scene.view.prp.add(u);
             scene.view.srp = scene.view.srp.add(u);
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 68: // D key
             console.log("D");
             scene.view.prp = scene.view.prp.subtract(u);
             scene.view.srp = scene.view.srp.subtract(u);
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 83: // S key
             console.log("S");
-            scene.view.prp.z -= 2;
-            scene.view.srp.z -= 2;
+            scene.view.prp = scene.view.prp.add(n);
+            scene.view.srp = scene.view.srp.add(n);
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 87: // W key
             console.log("W");
-            scene.view.prp.z += 2;
-            scene.view.srp.z += 2;
+            scene.view.prp = scene.view.prp.subtract(n);
+            scene.view.srp = scene.view.srp.subtract(n);
+            ctx.clearRect(0,0, view.width, view.height);
             break;
     }
 }
