@@ -24,7 +24,8 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            type: 'perspective',
+            //type: 'perspective',
+            type: 'parallel',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
@@ -55,7 +56,7 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            },  
+            }/*,  
             {
                 "type": 'cube',
                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
@@ -89,7 +90,7 @@ function init() {
                     "axis": "y",
                     "rps": 0.5
                 }
-            }
+            }*/
         ]
     };
 
@@ -115,15 +116,21 @@ function animate(timestamp) {
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-     window.requestAnimationFrame(animate);
+     //window.requestAnimationFrame(animate);
 }
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
+    if (scene.view.type == "perspective") {
+        drawPerspective();
+    } else {
+        drawParallel();
+    }
+}
+
+function drawPerspective() {
     // For each model, for each edge
-    
     var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-    
 
     // The vertices array which contains sets of vertices from each individual models.
     // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
@@ -200,7 +207,123 @@ function drawScene() {
         }
         counter++;
     }
+}
 
+function drawParallel() {
+    var nPer = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+
+    //console.log("nper: " + nPer);
+
+    // The vertices array which contains sets of vertices from each individual models.
+    // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
+    let vertices = [];
+    let counter = 0;
+    // For loop iterate and access all the given vertices
+    // Use the given vertices and multiply it by matrix(mPer)
+    for (let i = 0; i < scene.models.length; i++){
+        // These if statements are converting models of specific types into generic models that hold their edges and verticies
+        // Functions being called are at the bottom of this file
+        if(scene.models[i].type == "cube") {
+            scene.models[i] = drawCube(scene.models[i]);
+        } else if(scene.models[i].type == "cone") {
+            scene.models[i] = drawCone(scene.models[i]);
+        } else if(scene.models[i].type == "cylinder") {
+            scene.models[i] = drawCylinder(scene.models[i]);
+        } else if(scene.models[i].type == "sphere") {
+            scene.models[i] = drawSphere(scene.models[i]);
+        }
+        // The set of vertices for the current model
+        let verticesTemp = [];
+        // For loop iterate through all the vertices and multiply by nPer
+        for (let j = 0; j < scene.models[i].vertices.length; j++) {
+            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+        }
+        // Add vertices to the verticesTemp
+        vertices.push(verticesTemp);
+    }
+
+    //console.log("vertices: " + vertices);
+
+    // Go through all possible edges and take each vertices of the given edges
+    // to clip and draw them onto the scene.
+    for (let i = 0; i < scene.models.length; i++){
+        for (let j = 0; j < scene.models[i].edges.length; j++) {
+            for (let k = 0; k < scene.models[i].edges[j].length-1; k++) {
+                // Here, I think we are referencing the actual vertices, so just to be safe,
+                // this is now a reference to the actual vertices (if that is the case)
+                let hold_pt0 = vertices[counter][scene.models[i].edges[j][k]];
+                let hold_pt1 = vertices[counter][scene.models[i].edges[j][k + 1]];
+
+                // Create the 2 new points with references to hold_pts data.
+                let pt0 = new Vector4(hold_pt0.data[0], hold_pt0.data[1], hold_pt0.data[2], hold_pt0.data[3]);
+                let pt1 = new Vector4(hold_pt1.data[0], hold_pt1.data[1], hold_pt1.data[2], hold_pt1.data[3]);
+
+                // Create line
+                let line = {pt0:pt0, pt1:pt1};
+
+                
+                // Clip the line
+                line = clipLineParallel(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
+
+                if (line!=null) {
+                    // Set points to be a vector that contain the newly clipped values
+                    
+                    pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
+                    pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+                    console.log(pt0);
+                    console.log(pt1);
+
+                    // Multiply the points by mPer (turn into view scene)
+                    let mPer = mat4x4MPar();
+                    pt0 = mPer.mult(pt0);
+                    pt1 = mPer.mult(pt1);
+
+                    // Convert points to to World Coordinate
+                    let viewToWorld = new Matrix(4,4);
+                    mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                    pt0 = viewToWorld.mult(pt0);
+                    pt1 = viewToWorld.mult(pt1);
+
+                    // Define points values to draw
+                    let x1 = pt0.data[0] / pt0.data[3];
+                    let y1 = pt0.data[1] / pt0.data[3]
+                    let x2 = pt1.data[0] / pt1.data[3];
+                    let y2 = pt1.data[1] / pt1.data[3]
+                    
+
+                    // Draw the line
+                    drawLine(x1, y1, x2, y2);
+                }
+
+                /*
+                // Set points to be a vector that contain the newly clipped values
+                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
+                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+
+                // Multiply the points by mPer (turn into view scene)
+                let mPer = mat4x4MPar();
+                pt0 = mPer.mult(pt0);
+                pt1 = mPer.mult(pt1);
+
+                // Convert points to to World Coordinate
+                let viewToWorld = new Matrix(4,4);
+                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                pt0 = viewToWorld.mult(pt0);
+                pt1 = viewToWorld.mult(pt1);
+
+                // Define points values to draw
+                let x1 = pt0.data[0] / pt0.data[3];
+                let y1 = pt0.data[1] / pt0.data[3]
+                let x2 = pt1.data[0] / pt1.data[3];
+                let y2 = pt1.data[1] / pt1.data[3]
+
+                // Draw the line
+                drawLine(x1, y1, x2, y2);
+                */
+            }
+        }
+        counter++;
+    }
 }
 
 // Get outcode for vertex (parallel view volume)
@@ -254,8 +377,8 @@ function outcodePerspective(vertex, z_min) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLineParallel(line) {
     let result = null;
-    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
-    let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
+    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w); 
+    let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
     let out0 = outcodeParallel(p0);
     let out1 = outcodeParallel(p1);
     
@@ -276,7 +399,7 @@ function clipLineParallel(line) {
             } else {
                 outcode = out1;
             }
-            //console.log(outcode);
+            
 
             /* BOUNDS: 
             LEFT: x = -1, RIGHT: x = 1
