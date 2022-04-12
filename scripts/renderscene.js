@@ -24,8 +24,7 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            //type: 'perspective',
-            type: 'parallel',
+            type: 'perspective',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
@@ -56,7 +55,7 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            },
+            },  
             {
                 "type": 'cube',
                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
@@ -73,8 +72,8 @@ function init() {
                 "type": "cone",
                 "center": [-30, 10, -30],
                 "radius": 10,
-                "height": 20,
-                "sides": 10,
+                "height": 50,
+                "sides": 50,
                 "animation": {
                              "axis": "y",
                              "rps": 0.5
@@ -84,8 +83,19 @@ function init() {
                 "type": "cylinder",
                 "center": [-30, 25, -10],
                 "radius": 5,
-                "height": 20,
-                "sides": 10,
+                "height": 40,
+                "sides": 50,
+                "animation": {
+                    "axis": "y",
+                    "rps": 0.5
+                }
+            },
+            {
+                "type": "sphere",
+                "center": [-15, 40,-55],
+                "radius": 20,
+                "slices": 20,
+                "stacks": 20,
                 "animation": {
                     "axis": "y",
                     "rps": 0.5
