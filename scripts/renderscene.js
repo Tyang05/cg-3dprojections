@@ -56,7 +56,7 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            }/*,  
+            },
             {
                 "type": 'cube',
                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
@@ -90,7 +90,7 @@ function init() {
                     "axis": "y",
                     "rps": 0.5
                 }
-            }*/
+            }
         ]
     };
 
@@ -678,20 +678,6 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
-//references
-
-const modelSphere = {
-    "type": "sphere",
-    "center": [-20, 3,-20],
-    "radius": 20,
-    "slices": 100,
-    "stacks": 100,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-
-}
 
 //Constant object that gets returned
 
@@ -708,8 +694,6 @@ function generic() {
 
 function drawCube(modelCube) {
     var cube = generic();
-    cube.vertices = [];
-    cube.edges = [];
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
@@ -725,8 +709,6 @@ function drawCube(modelCube) {
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
 
-    console.log(cube.vertices);
-
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
     cube.edges.push([0, 4]);
@@ -740,13 +722,7 @@ function drawCube(modelCube) {
 function drawCone(modelCone) {
 
     let circleArray;
-    let i;
     var cone = generic();
-    cone.vertices = [];
-    cone.edges = [];
-    cone.matrix= new Matrix(4, 4);
-
-
     let n = modelCone.sides;
     let center = modelCone.center;
     let radius = modelCone.radius;
@@ -755,7 +731,7 @@ function drawCone(modelCone) {
     //Top Point
     cone.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
 
-    for(i = 0; i<n; i++) {
+    for(let i = 0; i<n; i++) {
         // Each computed Cartesian x,y variable  
         let radian = this.degreesToRadians((360 / n) * i);
         // Each computed Cartesian x,y variable  
@@ -777,7 +753,7 @@ function drawCone(modelCone) {
 
     //Connect each point of the circle to the next point 
     //Connect each point to the point on top
-    for (i = 0; i<cone.vertices.length-2; i++) {
+    for (let i = 0; i<cone.vertices.length-2; i++) {
         circleArray = [i+1, i+2];
         let coneArray = [0, i + 1];
 
@@ -796,8 +772,6 @@ function degreesToRadians(degrees) {
 
 function drawCylinder(modelCylinder) {
     var cylinder = generic();
-    cylinder.vertices = [];
-    cylinder.edges = [];
     cylinder.matrix= new Matrix(4, 4);
 
     var n = modelCylinder.sides;
@@ -845,13 +819,62 @@ function drawCylinder(modelCylinder) {
     return cylinder;
 }
 
+
+
+
+
 function drawSphere(modelSphere) {
-    //draw the same circle but rotate 360/ slices degrees for longitudinal lines and then connect each edge for latitudinal line every 180/stacks degrees   
-    let sphere = new generic;
-    sphere.vertices.push;
-    sphere.edges.push;
+    var sphere = generic();
+    sphere.edges = [];
+    sphere.vertices = [];
+    var n = modelSphere.stacks;
+    var radius = modelSphere.radius;
+    var center = [0,0,0]; //instead of translating it, just calculate then translate
+    var degrees = 360/modelSphere.slices;
+    var translating = modelSphere.center;
 
+    for(var i=0; i< modelSphere.slices-.5; i++){
+        var rotate = new Matrix(4,4);
+        mat4x4Identity(rotate);
+        mat4x4RotateY(rotate, degreesToRadians(degrees*i));
+
+        for(var j=0; j<n; j+=.5) {
+            var radian = degreesToRadians((360/n)*j);
+            var x0 = (center[0] + radius * Math.cos(radian));
+            var y0 = (center[1] + radius * Math.sin(radian));
+            var z0 = (center[2]);
+    
+            let pt0 = Vector4(x0,y0,z0,1);
+
+            var translate = new Matrix(4,4);
+            mat4x4Identity(translate);
+            mat4x4Translate(translate, translating[0], translating[1], translating[2], 1);
+            
+            var mult_array = [];
+            mult_array.push(translate);
+            mult_array.push(rotate);
+            mult_array.push(pt0);
+
+
+            var final = [];
+            final = Matrix.multiply(mult_array).rawArray();
+            let pushed = Vector4(final[0], final[1], final[2], final[3]);
+
+            sphere.vertices.push(pushed);
+
+        }     
+    }
+    for (var i=0; i<sphere.vertices.length-modelSphere.stacks*2 ; i++){
+        //left to right
+        sphere.edges.push([i, i+modelSphere.stacks*2]);
+    }
+
+    for (var i=0; i<sphere.vertices.length; i++){
+        if ((i+1)%(modelSphere.stacks*2) != 0 && (i) % (modelSphere.stacks*2) != 19){
+            sphere.edges.push([i,i+1]);
+
+        } 
+    }
+    
     return sphere;
-
 }
-
