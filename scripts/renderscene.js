@@ -31,82 +31,71 @@ function init() {
             clip: [-19, 5, -10, 8, 12, 100]
         },
         models: [
-            // {
-            //     type: 'generic',
-            //     vertices: [
-            //         Vector4( 0,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
-            //         Vector4(20,  0, -30, 1), // 1
-            //         Vector4(20, 12, -30, 1), // 2
-            //         Vector4(10, 20, -30, 1), // 3
-            //         Vector4( 0, 12, -30, 1), // 4
-            //         Vector4( 0,  0, -60, 1), // 5
-            //         Vector4(20,  0, -60, 1), // 6
-            //         Vector4(20, 12, -60, 1), // 7 
-            //         Vector4(10, 20, -60, 1), // 8
-            //         Vector4( 0, 12, -60, 1)  // 9
-            //     ],
-            //     edges: [
-            //         [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
-            //         [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
-            //         [0, 5], // 2 
-            //         [1, 6], // 3
-            //         [2, 7],
-            //         [3, 8],
-            //         [4, 9]
-            //     ],
-            //     matrix: new Matrix(4, 4)
-            // },  
-            // {
-            //     "type": 'cube',
-            //     "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
-            //     "width": 10,
-            //     "height": 10,
-            //     "depth": 10,
-            //      "animation": {
-            //             "axis": "y",
-            //             "rps": 0.5
-            //         }
+            {
+                type: 'generic',
+                vertices: [
+                    Vector4( 0,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
+                    Vector4(20,  0, -30, 1), // 1
+                    Vector4(20, 12, -30, 1), // 2
+                    Vector4(10, 20, -30, 1), // 3
+                    Vector4( 0, 12, -30, 1), // 4
+                    Vector4( 0,  0, -60, 1), // 5
+                    Vector4(20,  0, -60, 1), // 6
+                    Vector4(20, 12, -60, 1), // 7 
+                    Vector4(10, 20, -60, 1), // 8
+                    Vector4( 0, 12, -60, 1)  // 9
+                ],
+                edges: [
+                    [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
+                    [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
+                    [0, 5], // 2 
+                    [1, 6], // 3
+                    [2, 7],
+                    [3, 8],
+                    [4, 9]
+                ],
+                matrix: new Matrix(4, 4)
+            },  
+            {
+                "type": 'cube',
+                "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+                "width": 10,
+                "height": 10,
+                "depth": 10,
+                 "animation": {
+                        "axis": "y",
+                        "rps": 0.5
+                    }
             
-            // },
-            // {
-            //     "type": "cone",
-            //     "center": [-30, 10, -30],
-            //     "radius": 10,
-            //     "height": 50,
-            //     "sides": 50,
-            //     "animation": {
-            //                  "axis": "y",
-            //                  "rps": 0.5
-            //              }
-            // },
-            // {
-            //     "type": "cylinder",
-            //     "center": [-30, 25, -10],
-            //     "radius": 5,
-            //     "height": 40,
-            //     "sides": 50,
-            //     "animation": {
-            //         "axis": "y",
-            //         "rps": 0.5
-            //     }
-            // },
-            // {
-            //     "type": "sphere",
-            //     "center": [-15, 40,-55],
-            //     "radius": 20,
-            //     "slices": 30,
-            //     "stacks": 30,
-            //     "animation": {
-            //         "axis": "y",
-            //         "rps": 0.5
-            //     }
-            // },
+            },
+            {
+                "type": "cone",
+                "center": [-30, 10, -30],
+                "radius": 10,
+                "height": 50,
+                "sides": 50,
+                "animation": {
+                             "axis": "y",
+                             "rps": 0.5
+                         }
+            },
+            {
+                "type": "cylinder",
+                "center": [-30, 25, -10],
+                "radius": 5,
+                "height": 40,
+                "sides": 50,
+                "animation": {
+                    "axis": "y",
+                    "rps": 0.5
+                }
+            },
             {
                 "type": "sphere",
-                "center": [-10, 20,-45],
-                "radius": 25,
-                "slices": 15,
-                "stacks": 15,
+                "center": [-15, 40,-55],
+                "radius": 20,
+                "slices": 20,
+                "stacks": 20,
                 "animation": {
                     "axis": "y",
                     "rps": 0.5
@@ -719,11 +708,11 @@ function drawSphere(modelSphere) {
     sphere.vertices = [];
     var n = modelSphere.stacks;
     var radius = modelSphere.radius;
-    var center = [0,0,0]; //instead of translating it
+    var center = [0,0,0]; //instead of translating it, just calculate then translate
     var degrees = 360/modelSphere.slices;
     var translating = modelSphere.center;
 
-    for(var i=0; i< modelSphere.slices-1; i++){
+    for(var i=0; i< modelSphere.slices-.5; i++){
         var rotate = new Matrix(4,4);
         mat4x4Identity(rotate);
         mat4x4RotateY(rotate, degreesToRadians(degrees*i));
@@ -755,19 +744,16 @@ function drawSphere(modelSphere) {
         }     
     }
     for (var i=0; i<sphere.vertices.length-modelSphere.stacks*2 ; i++){
-        //if(i+1 % modelSphere.stacks != 0){
-            //up and down
-        //sphere.edges.push([0,i]);
-        //}
         //left to right
         sphere.edges.push([i, i+modelSphere.stacks*2]);
     }
 
-    for (var i=0; i<sphere.vertices.length ; i++){
-        //if (i% modelSphere.slicles != 0){
-            sphere.edges.push([i, i+1]);
-        //}
+    for (var i=0; i<sphere.vertices.length; i++){
+        if ((i+1)%(modelSphere.stacks*2) != 0 && (i) % (modelSphere.stacks*2) != 19){
+            sphere.edges.push([i,i+1]);
 
+        } 
     }
+    
     return sphere;
 }
