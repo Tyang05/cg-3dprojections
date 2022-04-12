@@ -92,7 +92,7 @@ function init() {
             },
             {
                 "type": "sphere",
-                "center": [-15, 20,-35],
+                "center": [-15, 40,-55],
                 "radius": 20,
                 "slices": 30,
                 "stacks": 30,
@@ -573,8 +573,6 @@ function generic() {
 
 function drawCube(modelCube) {
     var cube = generic();
-    cube.vertices = [];
-    cube.edges = [];
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
@@ -603,13 +601,7 @@ function drawCube(modelCube) {
 function drawCone(modelCone) {
 
     let circleArray;
-    let i;
     var cone = generic();
-    cone.vertices = [];
-    cone.edges = [];
-    cone.matrix= new Matrix(4, 4);
-
-
     let n = modelCone.sides;
     let center = modelCone.center;
     let radius = modelCone.radius;
@@ -618,7 +610,7 @@ function drawCone(modelCone) {
     //Top Point
     cone.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
 
-    for(i = 0; i<n; i++) {
+    for(let i = 0; i<n; i++) {
         // Each computed Cartesian x,y variable  
         let radian = this.degreesToRadians((360 / n) * i);
         // Each computed Cartesian x,y variable  
@@ -640,7 +632,7 @@ function drawCone(modelCone) {
 
     //Connect each point of the circle to the next point 
     //Connect each point to the point on top
-    for (i = 0; i<cone.vertices.length-2; i++) {
+    for (let i = 0; i<cone.vertices.length-2; i++) {
         circleArray = [i+1, i+2];
         let coneArray = [0, i + 1];
 
@@ -659,8 +651,6 @@ function degreesToRadians(degrees) {
 
 function drawCylinder(modelCylinder) {
     var cylinder = generic();
-    cylinder.vertices = [];
-    cylinder.edges = [];
     cylinder.matrix= new Matrix(4, 4);
 
     var n = modelCylinder.sides;
