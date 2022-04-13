@@ -213,8 +213,7 @@ function drawPerspective() {
 
 function drawParallel() {
     var nPer = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-
-    //console.log("nper: " + nPer);
+    console.log(nPer);
 
     // The vertices array which contains sets of vertices from each individual models.
     // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
@@ -257,34 +256,41 @@ function drawParallel() {
                 let hold_pt1 = vertices[counter][scene.models[i].edges[j][k + 1]];
 
                 // Create the 2 new points with references to hold_pts data.
-                let pt0 = new Vector4(hold_pt0.data[0], hold_pt0.data[1], hold_pt0.data[2], hold_pt0.data[3]);
-                let pt1 = new Vector4(hold_pt1.data[0], hold_pt1.data[1], hold_pt1.data[2], hold_pt1.data[3]);
+                let pt0 = new Vector4(hold_pt0.data[0], hold_pt0.data[1], hold_pt0.data[2]);
+                let pt1 = new Vector4(hold_pt1.data[0], hold_pt1.data[1], hold_pt1.data[2]);
 
                 // Create line
-                let line = {pt0:pt0, pt1:pt1};
+                let points = {pt0:pt0, pt1:pt1};
 
                 
                 // Clip the line
-                line = clipLineParallel(line, (-1*scene.view.clip[4]) / scene.view.clip[5]);
+                line = clipLineParallel(points);
 
                 if (line!=null) {
                     // Set points to be a vector that contain the newly clipped values
                     
-                    pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
-                    pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+                    pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z);
+                    pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z);
                     console.log(pt0);
                     console.log(pt1);
 
                     // Multiply the points by mPer (turn into view scene)
                     let mPer = mat4x4MPar();
+                    console.log(mPer);
+
                     pt0 = mPer.mult(pt0);
+                    console.log(pt0);
                     pt1 = mPer.mult(pt1);
+                    console.log(pt1);
 
                     // Convert points to to World Coordinate
                     let viewToWorld = new Matrix(4,4);
                     mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                    console.log(viewToWorld);
                     pt0 = viewToWorld.mult(pt0);
+                    console.log(pt0);
                     pt1 = viewToWorld.mult(pt1);
+                    console.log(pt1);
 
                     // Define points values to draw
                     let x1 = pt0.data[0] / pt0.data[3];
@@ -379,8 +385,9 @@ function outcodePerspective(vertex, z_min) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLineParallel(line) {
     let result = null;
-    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w); 
-    let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+    console.log(line);
+    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
+    let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodeParallel(p0);
     let out1 = outcodeParallel(p1);
     
@@ -409,54 +416,53 @@ function clipLineParallel(line) {
             FAR: z = -1, NEAR z = 0
             */
             let x,y,z,t = null;
-            let dx = p1.x - p0.x;
-            let dy = p1.y - p0.y;
-            let dz = p1.z - p0.z;
-
+            let cross = new Vector3(0,0,0,);
             if (outcode & LEFT) {
                 console.log("Clip Parallel Left");
                 x = -1;
-                y = p0.y + ((x - p0.x) * dy) / dx;
-                z = p0.z + ((x - p0.x) * dz) / dx;
+                t = (x - p0.x) / (p1.x - p0.x);
+                cross.y = p0.y + t * (p1.y - p0.y);
+                cross.z = p0.z + t * (p1.z - p0.z);
             } else if (outcode & RIGHT) {
                 console.log("Clip Parallel Right");
                 x = 1;
-                y = p0.y + ((x - p0.x) * dy) / dx;
-                z = p0.z + ((x - p0.x) * dz) / dx;
+                t = (x - p0.x) / (p1.x - p0.x);
+                cross.y = p0.y + t * (p1.y - p0.y);
+                cross.z = p0.z + t * (p1.z - p0.z);
             } else if (outcode & BOTTOM) {
                 console.log("Clip Parallel Bottom");
                 y = -1;
-                x = p0.x + ((y - p0.y) * dx) / dy;
-                z = p0.z + ((y - p0.y) * dz) / dy;
+                t = (y - p0.y) / (p1.y - p0.y);
+                cross.x = p0.x + t * (p1.x - p0.x);
+                cross.z = p0.z + t * (p1.z - p0.z);
             } else if (outcode & TOP) {
                 console.log("Clip Parallel Top");
                 y = 1;
-                x = p0.x + ((y - p0.y) * dx) / dy;
-                z = p0.z + ((y - p0.y) * dz) / dy;
+                t = (y - p0.y) / (p1.y - p0.y);
+                cross.x = p0.x + t * (p1.x - p0.x);
+                cross.z = p0.z + t * (p1.z - p0.z);
             } else if (outcode & FAR) {
                 console.log("Clip Parallel Far");
                 z = -1;
-                y = p0.y + ((z - p0.z) * dy) / dz;
-                x = p0.x + ((z - p0.z) * dx) / dz;
+                t = (z - p0.z) / (p1.z - p0.z);
+                cross.x = p0.x + t * (p1.x - p0.x);
+                cross.y = p0.y + t * (p1.y - p0.y);
             } else if (outcode & NEAR) {
                 console.log("Clip Parallel Near");
                 z = 0;
-                y = p0.y + ((z - p0.z) * dy) / dz;
-                x = p0.x + ((z - p0.z) * dx) / dz;
+                t = (z - p0.z) / (p1.z - p0.z);
+                cross.x = p0.x + t * (p1.x - p0.x);
+                cross.y = p0.y + t * (p1.y - p0.y);
             }
 
             if(outcode == out0) {
-                p0.x = x;
-                p0.y = y;
-                p0.z = z;
+                p0 = cross;
                 out0 = outcodeParallel(p0);
             }
 
             // Else, it do the same but for out1
             else {
-                p1.x = x;
-                p1.y = y;
-                p1.z = z;
+                p1 = cross;
                 out1 = outcodeParallel(p1);
             }
 
@@ -465,6 +471,7 @@ function clipLineParallel(line) {
             result = line;
         }
     }
+    console.log(result);
     return result;
 }
 
