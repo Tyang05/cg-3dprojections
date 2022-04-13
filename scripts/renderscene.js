@@ -24,8 +24,7 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            //type: 'perspective',
-            type: 'parallel',
+            type: 'perspective',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
@@ -56,41 +55,52 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            }/*,  
-            {
-                "type": 'cube',
-                "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
-                "width": 10,
-                "height": 10,
-                "depth": 10,
-                 "animation": {
-                        "axis": "y",
-                        "rps": 0.5
-                    }
+            },  
+             {
+                 "type": 'cube',
+                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+                 "width": 10,
+                 "height": 10,
+                 "depth": 10,
+                  "animation": {
+                         "axis": "y",
+                         "rps": 0.5
+                     }
             
-            },
-            {
-                "type": "cone",
-                "center": [-30, 10, -30],
-                "radius": 10,
-                "height": 20,
-                "sides": 10,
-                "animation": {
-                             "axis": "y",
-                             "rps": 0.5
-                         }
-            },
-            {
-                "type": "cylinder",
-                "center": [-30, 25, -10],
-                "radius": 5,
-                "height": 20,
-                "sides": 10,
-                "animation": {
-                    "axis": "y",
-                    "rps": 0.5
-                }
-            }*/
+             },
+             {
+                 "type": "cone",
+                 "center": [-30, 10, -30],
+                 "radius": 10,
+                 "height": 50,
+                 "sides": 50,
+                 "animation": {
+                              "axis": "y",
+                              "rps": 0.5
+                          }
+             },
+             {
+                 "type": "cylinder",
+                 "center": [-30, 25, -10],
+                 "radius": 5,
+                 "height": 40,
+                 "sides": 50,
+                 "animation": {
+                     "axis": "y",
+                     "rps": 0.5
+                 }
+             },
+             {
+                 "type": "sphere",
+                 "center": [-15, 45, -65],
+                 "radius": 20,
+                 "slices": 20,
+                 "stacks": 20,
+                 "animation": {
+                     "axis": "y",
+                     "rps": 0.5
+                 }
+             }
         ]
     };
 
@@ -110,13 +120,72 @@ function animate(timestamp) {
     
     // step 2: transform models based on time
     // TODO: implement this!
+    
+    for (let i = 0; i < scene.models.length; i++){
+        // These if statements are converting models of specific types into generic models that hold their edges and verticies
+        // Functions being called are at the bottom of this file
+        if(scene.models[i].type == "cube") {
+            scene.models[i] = drawCube(scene.models[i]);
+        } else if(scene.models[i].type == "cone") {
+            scene.models[i] = drawCone(scene.models[i]);
+        } else if(scene.models[i].type == "cylinder") {
+            scene.models[i] = drawCylinder(scene.models[i]);
+        } else if(scene.models[i].type == "sphere") {
+            scene.models[i] = drawSphere(scene.models[i]);
+        }
+        for (let j = 0; j < scene.models[i].vertices.length; j++) {
+
+            var vertex = scene.models[i].vertices[j];
+            var degrees = 5;
+            // take current point
+            // translate to the center
+            var  translate_center = new Matrix(4,4);
+            mat4x4Identity(translate_center);
+            mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
+            
+            // rotate theta degrees (probbaly calculated based on time)
+            let rotate_y = new Matrix(4,4);
+            mat4x4Identity(rotate_y);
+            mat4x4RotateY(rotate_y, degreesToRadians(degrees));
+            //console.log(rotate_y);
+            
+            // translate back to where it should be
+            var translate_back = new Matrix(4,4);
+            mat4x4Identity(translate_back);
+            mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
+            
+            // combine into one translation matrix
+            var mult_array = [];
+            mult_array.push(translate_back);
+            mult_array.push(rotate_y);
+            mult_array.push(translate_center);
+            var animate_matrix = Matrix.multiply(mult_array);
+            //console.log(animate_matrix);
+
+            // calculate new point and overwrite old point
+            
+            var rotated_point = animate_matrix.mult(scene.models[i].vertices[j]);
+            //console.log(rotated_point);
+
+            // console.log(scene.models[i].vertices[j]);
+            let new_vector = Vector4(rotated_point.values[0], rotated_point.values[1], rotated_point.values[2], rotated_point.values[3]);
+
+            //console.log(scene.models[i].vertices[j]);
+            scene.models[i].vertices[j] = new_vector;
+            //console.log(scene.models[i].vertices[j]);
+
+        }
+    }
+
 
     // step 3: draw scene
     drawScene();
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-     //window.requestAnimationFrame(animate);
+    //setTimeout(() => {
+        window.requestAnimationFrame(animate);
+    //}, 100);
 }
 
 // Main drawing code - use information contained in variable `scene`
@@ -139,17 +208,7 @@ function drawPerspective() {
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
-        // These if statements are converting models of specific types into generic models that hold their edges and verticies
-        // Functions being called are at the bottom of this file
-        if(scene.models[i].type == "cube") {
-            scene.models[i] = drawCube(scene.models[i]);
-        } else if(scene.models[i].type == "cone") {
-            scene.models[i] = drawCone(scene.models[i]);
-        } else if(scene.models[i].type == "cylinder") {
-            scene.models[i] = drawCylinder(scene.models[i]);
-        } else if(scene.models[i].type == "sphere") {
-            scene.models[i] = drawSphere(scene.models[i]);
-        }
+        
         // The set of vertices for the current model
         let verticesTemp = [];
         // For loop iterate through all the vertices and multiply by nPer
@@ -238,6 +297,7 @@ function drawParallel() {
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
             verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+            
         }
         // Add vertices to the verticesTemp
         vertices.push(verticesTemp);
@@ -302,32 +362,6 @@ function drawParallel() {
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
                 }
-
-                /*
-                // Set points to be a vector that contain the newly clipped values
-                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
-                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
-
-                // Multiply the points by mPer (turn into view scene)
-                let mPer = mat4x4MPar();
-                pt0 = mPer.mult(pt0);
-                pt1 = mPer.mult(pt1);
-
-                // Convert points to to World Coordinate
-                let viewToWorld = new Matrix(4,4);
-                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
-                pt0 = viewToWorld.mult(pt0);
-                pt1 = viewToWorld.mult(pt1);
-
-                // Define points values to draw
-                let x1 = pt0.data[0] / pt0.data[3];
-                let y1 = pt0.data[1] / pt0.data[3]
-                let x2 = pt1.data[0] / pt1.data[3];
-                let y2 = pt1.data[1] / pt1.data[3]
-
-                // Draw the line
-                drawLine(x1, y1, x2, y2);
-                */
             }
         }
         counter++;
@@ -414,13 +448,7 @@ function clipLineParallel(line) {
                 outcode = out0;
                 theEnd = p0;
             }
-            
 
-            /* BOUNDS: 
-            LEFT: x = -1, RIGHT: x = 1
-            BOTTOM: y = -1, TOP: y = 1
-            FAR: z = -1, NEAR z = 0
-            */
             let x,y,z,t = null;
             let cross = new Vector3(0,0,0);
             if (outcode & LEFT) {
@@ -530,7 +558,10 @@ function clipLinePerspective(line, z_min) {
             // Check via RIGHT plane, calculate its new interception points and decrement outcode
             else if(outcode & RIGHT) {
                                     // Flipped points for negative change in slope
-                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p0.z - p1.z));
+                let delta_x = p1.x - p0.x;
+                let delta_y = p1.y - p0.y;
+
+                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -547,7 +578,7 @@ function clipLinePerspective(line, z_min) {
             // Check via TOP plane, calculate its new interception points and decrement outcode
             else if(outcode & TOP) {
                                     // Flipped points for negative change in slope
-                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p0.z - p1.z));
+                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -556,7 +587,7 @@ function clipLinePerspective(line, z_min) {
             // Check via FAR plane, calculate its new interception points and decrement outcode
             else if(outcode & FAR) {
                 // Flipped points for negative change in slope
-                t = (p0.z - z_min) / (p0.z- p1.z);
+                t = (-p0.z - 1) / (p1.z - p0.z);
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -564,7 +595,8 @@ function clipLinePerspective(line, z_min) {
             }
             // Check via NEAR plane, calculate its new interception points and decrement outcode
             else {
-                t = (-p0.z - 1) / (p1.z- p0.z);
+                t = (p0.z - z_min) / (p0.z - p1.z);
+
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -615,9 +647,47 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
+            let hold_SRP_Left = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );  
+
+            // Translate SRP to PRP
+            let transformation_Left = new Matrix(4, 4);
+            mat4x4Identity(transformation_Left);
+            mat4x4Translate(transformation_Left, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
+
+            mat4x4Identity(transformation_Left);
+            mat4x4RotateV(transformation_Left, v, degreesToRadians(2));
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
+
+            mat4x4Identity(transformation_Left);
+            mat4x4Translate(transformation_Left, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
+ 
+            let new_SRP_Left = new Vector3(hold_SRP_Left.data[0], hold_SRP_Left.data[1], hold_SRP_Left.data[2]);
+            scene.view.srp = new_SRP_Left;
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 39: // RIGHT Arrow
             console.log("right");
+            let hold_SRP_Right = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );  
+
+            // Translate SRP to PRP
+            let transformation_Right = new Matrix(4, 4);
+            mat4x4Identity(transformation_Right);
+            mat4x4Translate(transformation_Right, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            mat4x4Identity(transformation_Right);
+            mat4x4RotateV(transformation_Right, v, degreesToRadians(-2));
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            mat4x4Identity(transformation_Right);
+            mat4x4Translate(transformation_Right, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            let new_SRP_Right = new Vector3(hold_SRP_Right.data[0], hold_SRP_Right.data[1], hold_SRP_Right.data[2]);
+            scene.view.srp = new_SRP_Right;
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 65: // A key
             console.log("A");
@@ -698,20 +768,6 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
-//references
-
-const modelSphere = {
-    "type": "sphere",
-    "center": [-20, 3,-20],
-    "radius": 20,
-    "slices": 100,
-    "stacks": 100,
-    "animation": {
-        "axis": "y",
-        "rps": 0.5
-    }
-
-}
 
 //Constant object that gets returned
 
@@ -728,8 +784,6 @@ function generic() {
 
 function drawCube(modelCube) {
     var cube = generic();
-    cube.vertices = [];
-    cube.edges = [];
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
@@ -745,8 +799,6 @@ function drawCube(modelCube) {
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]-depth/2,  1));
     cube.vertices.push(Vector4(center[0]-width/2, center[1]+height, center[2]+depth/2,  1));
 
-    console.log(cube.vertices);
-
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
     cube.edges.push([0, 4]);
@@ -760,13 +812,7 @@ function drawCube(modelCube) {
 function drawCone(modelCone) {
 
     let circleArray;
-    let i;
     var cone = generic();
-    cone.vertices = [];
-    cone.edges = [];
-    cone.matrix= new Matrix(4, 4);
-
-
     let n = modelCone.sides;
     let center = modelCone.center;
     let radius = modelCone.radius;
@@ -775,7 +821,7 @@ function drawCone(modelCone) {
     //Top Point
     cone.vertices.push(Vector4(center[0], center[1]+height, center[2], 1));
 
-    for(i = 0; i<n; i++) {
+    for(let i = 0; i<n; i++) {
         // Each computed Cartesian x,y variable  
         let radian = this.degreesToRadians((360 / n) * i);
         // Each computed Cartesian x,y variable  
@@ -797,7 +843,7 @@ function drawCone(modelCone) {
 
     //Connect each point of the circle to the next point 
     //Connect each point to the point on top
-    for (i = 0; i<cone.vertices.length-2; i++) {
+    for (let i = 0; i<cone.vertices.length-2; i++) {
         circleArray = [i+1, i+2];
         let coneArray = [0, i + 1];
 
@@ -816,8 +862,6 @@ function degreesToRadians(degrees) {
 
 function drawCylinder(modelCylinder) {
     var cylinder = generic();
-    cylinder.vertices = [];
-    cylinder.edges = [];
     cylinder.matrix= new Matrix(4, 4);
 
     var n = modelCylinder.sides;
@@ -865,13 +909,63 @@ function drawCylinder(modelCylinder) {
     return cylinder;
 }
 
+
+
+
+
 function drawSphere(modelSphere) {
-    //draw the same circle but rotate 360/ slices degrees for longitudinal lines and then connect each edge for latitudinal line every 180/stacks degrees   
-    let sphere = new generic;
-    sphere.vertices.push;
-    sphere.edges.push;
+    var sphere = generic();
+    var n = modelSphere.stacks;
+    var radius = modelSphere.radius;
+    var center = [0,0,0]; //instead of translating it, just calculate then translate
+    var degrees = 360/modelSphere.slices;
+    var translating = modelSphere.center;
 
+    for(var i=0; i< modelSphere.slices-.5; i++){
+        var rotate = new Matrix(4,4);
+        mat4x4Identity(rotate);
+        mat4x4RotateY(rotate, degreesToRadians(degrees*i));
+
+        for(var j=0; j<n; j+=.5) {
+            var radian = degreesToRadians((360/n)*j);
+            var x0 = (center[0] + radius * Math.cos(radian));
+            var y0 = (center[1] + radius * Math.sin(radian));
+            var z0 = (center[2]);
+    
+            let pt0 = Vector4(x0,y0,z0,1);
+
+            var translate = new Matrix(4,4);
+            mat4x4Identity(translate);
+            mat4x4Translate(translate, translating[0], translating[1], translating[2], 1);
+            
+            var mult_array = [];
+            mult_array.push(translate);
+            mult_array.push(rotate);
+            mult_array.push(pt0);
+
+
+            var final = [];
+            final = Matrix.multiply(mult_array).rawArray();
+            let pushed = Vector4(final[0], final[1], final[2], final[3]);
+
+            sphere.vertices.push(pushed);
+
+        }     
+    }
+    for (var i=0; i<sphere.vertices.length-modelSphere.stacks*2 ; i++){
+        //left to right
+        sphere.edges.push([i, i+modelSphere.stacks*2]);
+    }
+
+    for (var i=0; i<sphere.vertices.length; i++){
+        if ((i+1)%(modelSphere.stacks*2) != 0 && (i) % (modelSphere.stacks*2) != 19){
+            sphere.edges.push([i,i+1]);
+        } 
+    }
+    
     return sphere;
-
 }
+
+
+
 
