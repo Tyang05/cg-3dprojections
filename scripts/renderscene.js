@@ -127,7 +127,7 @@ function animate(timestamp) {
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
     //setTimeout(() => {
-        //window.requestAnimationFrame(animate); 
+        window.requestAnimationFrame(animate); 
     //}, 100);
 }
 
@@ -614,26 +614,22 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            // Translate prp to origin
-            let originPRP = new Vector3(-scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
-            // Set prp to origin
-            scene.view.prp = originPRP;
+            // Translate SRP to PRP
+            let transformation = new Matrix(4, 4);
+            mat4x4Identity(transformation);
+            mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
 
-            // Rotate Matrix around v-axis
-            identity = new Matrix(4,4);
-            mat4x4Identity(identity);
-            mat4x4RotateY(identity, 25);
-            
-             var holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1);
-             holdSRP = identity.mult(holdSRP);
-             console.log(holdSRP);
-             var newSRP = new Vector3();
-             newSRP.x = holdSRP.x;
-             
-             console.log(newSRP);
+            mat4x4RotateV(transformation, v, 25);
 
-             scene.view.srp = holdSRP;
-             break;
+            mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+
+            let holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );
+
+            holdSRP = transformation.mult(holdSRP);
+            let newSRP = new Vector3(holdSRP.data[0], holdSRP.data[1], holdSRP.data[2]);
+            scene.view.srp = newSRP;
+            ctx.clearRect(0,0, view.width, view.height);
+            break;
         case 39: // RIGHT Arrow
             console.log("right");
             break;
