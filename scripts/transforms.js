@@ -25,6 +25,7 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     let rotate = new Matrix(4, 4);
     mat4x4Identity(rotate);
     mat4x4PerspectiveRotate(rotate, u, v, n);
+    //console.log("rotate: " + rotate);
 
     // 3. shear such that CW is on the z-axis
     let left = clip[0];
@@ -53,10 +54,10 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     //console.log("tpar: " + tpar);
 
     // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
-    let Spar = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
+    let Sper = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
     let scale = new Matrix(4, 4);
     mat4x4Identity(scale);
-    mat4x4Scale(scale, Spar.x, Spar.y, Spar.z);
+    mat4x4Scale(scale, Sper.x, Sper.y, Sper.z);
     //console.log("scale: " + scale);
 
     // Create an array of Matrices
@@ -178,11 +179,6 @@ function animate(vertex, degrees, nPer) {
     mult_array.push(translate_center);
     
     var rotate_matrix = Matrix.multiply(mult_array);
-    
-    let final_array = [];
-    final_array.push(vertex);
-    final_array.push(nPer);
-    final_array.push(rotate_matrix);
 
     //return
     var animation = Matrix.multiply(final_array);
@@ -243,27 +239,6 @@ function mat4x4RotateX(mat4x4, theta) {
                      [0, Math.cos(theta), -(Math.sin(theta)), 0],
                      [0, Math.sin(theta),    Math.cos(theta), 0],
                      [0,               0,                  0, 1]];
-}
-
-
-// set values of existing 4x4 matrix to align (u,v,n) to (x,y,z)
-function mat4x4RotateV(mat4x4, v, theta) {
-    let row0col0 = Math.cos(theta) + Math.pow(2, v.x) * (1 - Math.cos(theta));
-    let row0col1 = v.x * v.y * (1 - Math.cos(theta)) - v.z * Math.sin(theta);
-    let row0col2 = v.x * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta);
-
-    let row1col0 = v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta);
-    let row1col1 = Math.cos(theta) + Math.pow(2, v.y) * (1 - Math.cos(theta));
-    let row1col2 = v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta);
-
-    let row2col0 = v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta);
-    let row2col1 = v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta);
-    let row2col2 = Math.cos(theta) + Math.pow(2, v.z) * (1 - Math.cos(theta));
-
-    mat4x4.values = [[row0col0, row0col1, row0col2, 0],
-                    [row1col0, row1col1, row1col2,  0],
-                    [row2col0, row2col1, row2col2,  0],
-                    [0,     0,        0,            1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about y-axis matrix
