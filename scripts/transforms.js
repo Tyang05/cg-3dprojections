@@ -8,24 +8,19 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     mat4x4Identity(translate);
     // This line is equivalent to T(-prp);
     mat4x4Translate(translate, negPRP.x, negPRP.y, negPRP.z);
-    console.log(translate);
     
     // 2. rotate VRC such that (u,v,n) align with (x,y,z)
     let n = prp.subtract(srp);
     n.normalize();
-    console.log(n);
 
     let u = vup.cross(n);
     u.normalize();
-    console.log(u);
 
     let v = n.cross(u);
-    console.log(v);
 
     let rotate = new Matrix(4, 4);
     mat4x4Identity(rotate);
     mat4x4PerspectiveRotate(rotate, u, v, n);
-    console.log(rotate);
 
     // 3. shear such that CW is on the z-axis
     let left = clip[0];
@@ -35,44 +30,31 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     let near = clip[4];
     let far = clip[5];
 
-    let CW = new Vector3(((left + right) / 2), ((bottom + top) / 2), -near);
-    let DOP = CW;
+    let CW = new Vector3((left + right) / 2, (bottom + top) / 2, -near);
+    let DOP = CW.subtract(Vector3(0,0,0));
     console.log(CW);
     console.log(DOP);
 
     let shx = -DOP.x / DOP.z;
     let shy = -DOP.y / DOP.z;
-    console.log(shx);
-    console.log(shy);
 
     let shear = new Matrix(4, 4);
     mat4x4Identity(shear);
     mat4x4ShearXY(shear, shx, shy);
-    console.log(shear);
 
     // 4. translate near clipping plane to origin
     let tpar = new Matrix(4, 4);
     mat4x4Identity(tpar);
     mat4x4Translate(tpar, 0, 0, near);
-    console.log(tpar);
 
     // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
-    let Sper = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
+    let Sper = new Vector3(2/(right-left), 2/(top-bottom), 1/(far));
     let scale = new Matrix(4, 4);
     mat4x4Identity(scale);
     mat4x4Scale(scale, Sper.x, Sper.y, Sper.z);
-    console.log(scale);
-
-    // Create an array of Matrices
-    let matrices = new Array();
-    matrices.push(scale);
-    matrices.push(tpar);
-    matrices.push(shear);
-    matrices.push(rotate);
-    matrices.push(translate);
 
     // Multiply the array of matrices and solve for nPer
-    let transform = Matrix.multiply(matrices);
+    let transform = Matrix.multiply([scale, tpar, shear, rotate, translate]);
     console.log(transform);
     return transform;
 }
