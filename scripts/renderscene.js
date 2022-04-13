@@ -636,8 +636,12 @@ function onKeyDown(event) {
 
             mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
 
-            transformation
+            let holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );
 
+            holdSRP = transformation.mult(holdSRP);
+            let newSRP = new Vector3(holdSRP.data[0], holdSRP.data[1], holdSRP.data[2]);
+            scene.view.srp = newSRP;
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 39: // RIGHT Arrow
             console.log("right");
