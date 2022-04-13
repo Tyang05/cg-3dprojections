@@ -32,29 +32,29 @@ function init() {
         },
         models: [
             {
-                // type: 'generic',
-                // vertices: [
-                //     Vector4( -20,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
-                //     Vector4(20,  0, -30, 1), // 1
-                //     Vector4(20, 12, -30, 1), // 2
-                //     Vector4(10, 20, -30, 1), // 3
-                //     Vector4( 0, 12, -30, 1), // 4
-                //     Vector4( 0,  0, -60, 1), // 5
-                //     Vector4(20,  0, -60, 1), // 6
-                //     Vector4(20, 12, -60, 1), // 7 
-                //     Vector4(10, 20, -60, 1), // 8
-                //     Vector4( 0, 12, -60, 1)  // 9
-                // ],
-                // edges: [
-                //     [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
-                //     [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
-                //     [0, 5], // 2 
-                //     [1, 6], // 3
-                //     [2, 7],
-                //     [3, 8],
-                //     [4, 9]
-                // ],
-                // matrix: new Matrix(4, 4)
+                type: 'generic',
+                vertices: [
+                    Vector4( 0,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
+                    Vector4(20,  0, -30, 1), // 1
+                    Vector4(20, 12, -30, 1), // 2
+                    Vector4(10, 20, -30, 1), // 3
+                    Vector4( 0, 12, -30, 1), // 4
+                    Vector4( 0,  0, -60, 1), // 5
+                    Vector4(20,  0, -60, 1), // 6
+                    Vector4(20, 12, -60, 1), // 7 
+                    Vector4(10, 20, -60, 1), // 8
+                    Vector4( 0, 12, -60, 1)  // 9
+                ],
+                edges: [
+                    [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
+                    [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
+                    [0, 5], // 2 
+                    [1, 6], // 3
+                    [2, 7],
+                    [3, 8],
+                    [4, 9]
+                ],
+                matrix: new Matrix(4, 4)
             },  
             // {
             //     "type": 'cube',
@@ -68,16 +68,16 @@ function init() {
             //         }
             
             // },
-            {
-                "type": "cone",
-                "center": [-30, 10, -30],
-                "radius": 10,
-                "height": 50,
-                "sides": 50,
-                "animation": {
-                             "axis": "y",
-                             "rps": 0.5
-                         }
+            // {
+            //     "type": "cone",
+            //     "center": [-30, 10, -30],
+            //     "radius": 10,
+            //     "height": 50,
+            //     "sides": 50,
+            //     "animation": {
+            //                  "axis": "y",
+            //                  "rps": 0.5
+            //              }
             // },
             // {
             //     "type": "cylinder",
@@ -170,35 +170,8 @@ function drawPerspective() {
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
 
-            let vertex = scene.models[i].vertices[j];
-            //translate to center
-            var translate_center = new Matrix(4,4);
-            mat4x4Identity(translate_center);
-            mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
-                    
-            // rotate theta degrees (probbaly calculated based on time)
-            var rotate_y = new Matrix(4,4);
-            mat4x4Identity(rotate_y);
-            mat4x4RotateY(rotate_y, degreesToRadians(degrees));
-                    
-            // translate back to where it should be
-            var translate_back = new Matrix(4,4);
-            mat4x4Identity(translate_back);
-            mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
-                    
-            // get final animation matrix
-            var mult_array = [];
-            mult_array.push(translate_back);
-            mult_array.push(rotate_y);
-            mult_array.push(translate_center);
-            
-            var rotate_matrix = Matrix.multiply(mult_array);
-
-            console.log(rotate_matrix.mult(nPer.mult(scene.models[i].vertices[j])));
-            console.log(nPer.mult(scene.models[i].vertices[j]));
-            //verticesTemp[j] = animate(scene.models[i].vertices[j], degrees, nPer); //stack limit exceeded
-
-            verticesTemp[j] = rotate_matrix.mult(nPer).mult(scene.models[i].vertices[j]);
+            //verticesTemp[j] = rotate_animate(scene.models[i].vertices[j], degrees, nPer);
+            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
             
         }
         // Add vertices to the verticesTemp

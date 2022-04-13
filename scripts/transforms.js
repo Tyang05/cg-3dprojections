@@ -155,14 +155,13 @@ function mat4x4MPer() {
     return mper;
 }
 
-function animate(vertex, degrees, nPer) {
+function rotate_animate(vertex, degrees, nPer) {
 
     //translate to center
     var translate_center = new Matrix(4,4);
     mat4x4Identity(translate_center);
     mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
-            
-    // rotate theta degrees (probbaly calculated based on time)
+    // rotate theta degrees (calculated based on time)
     var rotate_y = new Matrix(4,4);
     mat4x4Identity(rotate_y);
     mat4x4RotateY(rotate_y, degreesToRadians(degrees));
@@ -179,10 +178,18 @@ function animate(vertex, degrees, nPer) {
     mult_array.push(translate_center);
     
     var rotate_matrix = Matrix.multiply(mult_array);
+    
+    let final_array = [];
+    final_array.push(rotate_matrix);
+    final_array.push(nPer);
+    final_array.push(vertex);
+    var animation = Matrix.multiply(final_array);
+    
+    console.log(rotate_matrix);
+    console.log(nPer);
+    console.log(animation);
 
     //return
-    var animation = Matrix.multiply(final_array);
-
     return animation;
 }
 
