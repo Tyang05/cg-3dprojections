@@ -2,7 +2,7 @@
 function mat4x4Parallel(prp, srp, vup, clip) {
     // 1. translate PRP to origin
     let negPRP = new Vector3(-prp.x, -prp.y, -prp.z);
-    console.log(negPRP);
+    //console.log(negPRP);
 
     let translate = new Matrix(4, 4);
     mat4x4Identity(translate);
@@ -32,8 +32,8 @@ function mat4x4Parallel(prp, srp, vup, clip) {
 
     let CW = new Vector3((left + right) / 2, (bottom + top) / 2, -near);
     let DOP = CW.subtract(Vector3(0,0,0));
-    console.log(CW);
-    console.log(DOP);
+    //console.log(CW);
+    //console.log(DOP);
 
     let shx = -DOP.x / DOP.z;
     let shy = -DOP.y / DOP.z;
@@ -55,7 +55,7 @@ function mat4x4Parallel(prp, srp, vup, clip) {
 
     // Multiply the array of matrices and solve for nPer
     let transform = Matrix.multiply([scale, tpar, shear, rotate, translate]);
-    console.log(transform);
+    //console.log(transform);
     return transform;
 }
 
@@ -195,6 +195,27 @@ function mat4x4RotateX(mat4x4, theta) {
                      [0, Math.cos(theta), -(Math.sin(theta)), 0],
                      [0, Math.sin(theta),    Math.cos(theta), 0],
                      [0,               0,                  0, 1]];
+}
+
+
+// set values of existing 4x4 matrix to align (u,v,n) to (x,y,z)
+function mat4x4RotateV(mat4x4, v, theta) {
+    let row0col0 = Math.cos(theta) + Math.pow(2, v.x) * (1 - Math.cos(theta));
+    let row0col1 = v.x * v.y * (1 - Math.cos(theta)) - v.z * Math.sin(theta);
+    let row0col2 = v.x * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta);
+
+    let row1col0 = v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta);
+    let row1col1 = Math.cos(theta) + Math.pow(2, v.y) * (1 - Math.cos(theta));
+    let row1col2 = v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta);
+
+    let row2col0 = v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta);
+    let row2col1 = v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta);
+    let row2col2 = Math.cos(theta) + Math.pow(2, v.z) * (1 - Math.cos(theta));
+
+    mat4x4.values = [[row0col0, row0col1, row0col2, 0],
+                    [row1col0, row1col1, row1col2,  0],
+                    [row2col0, row2col1, row2col2,  0],
+                    [0,     0,        0,            1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about y-axis matrix

@@ -24,7 +24,8 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            type: 'perspective',
+            //type: 'perspective',
+            type: 'parallel',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
@@ -55,7 +56,7 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            },  
+            }/*,  
              {
                  "type": 'cube',
                  "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
@@ -100,7 +101,7 @@ function init() {
                      "axis": "y",
                      "rps": 0.5
                  }
-             }
+             }*/
         ]
     };
 
@@ -272,7 +273,7 @@ function drawPerspective() {
 
 function drawParallel() {
     var nPer = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-    console.log(nPer);
+    //console.log(nPer);
 
     // The vertices array which contains sets of vertices from each individual models.
     // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
@@ -316,8 +317,6 @@ function drawParallel() {
                 // Create the 2 new points with references to hold_pts data.
                 let pt0 = new Vector4(hold_pt0.data[0], hold_pt0.data[1], hold_pt0.data[2], hold_pt0.data[3]);
                 let pt1 = new Vector4(hold_pt1.data[0], hold_pt1.data[1], hold_pt1.data[2], hold_pt1.data[3]);
-                console.log(pt0);
-                console.log(pt1);
 
                 // Create line
                 let points = {pt0:pt0, pt1:pt1};
@@ -331,33 +330,21 @@ function drawParallel() {
                     
                     pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, 1);
                     pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, 1);
-                    console.log(pt0);
-                    console.log(pt1);
 
                     // Multiply the points by mPer (turn into view scene)
                     let mPer = mat4x4MPar();
-                    console.log(mPer);
 
                     // Convert points to to World Coordinate
                     let viewToWorld = new Matrix(4,4);
                     mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
-                    console.log(viewToWorld);
                     pt0 = Matrix.multiply([viewToWorld, mPer, pt0]);
-                    console.log(pt0);
                     pt1 = Matrix.multiply([viewToWorld, mPer, pt1]);
-                    console.log(pt1);
 
                     // Define points values to draw
                     let x1 = pt0.x / pt0.w; 
                     let y1 = pt0.y / pt0.w;
                     let x2 = pt1.x / pt1.w;
                     let y2 = pt1.y / pt1.w;
-
-                    console.log(x1);
-                    console.log(x2);
-                    console.log(y1);
-                    console.log(y2);
-                    
 
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
@@ -452,42 +439,42 @@ function clipLineParallel(line) {
             let x,y,z,t = null;
             let cross = new Vector3(0,0,0);
             if (outcode & LEFT) {
-                console.log("Clip Parallel Left");
+                //console.log("Clip Parallel Left");
                 x = -1;
                 t = (x - p0.x) / (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
                 cross.z = p0.z + t * (p1.z - p0.z);
                 cross.x = x;
             } else if (outcode & RIGHT) {
-                console.log("Clip Parallel Right");
+                //console.log("Clip Parallel Right");
                 x = 1;
                 t = (x - p0.x) / (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
                 cross.z = p0.z + t * (p1.z - p0.z);
                 cross.x = x;
             } else if (outcode & BOTTOM) {
-                console.log("Clip Parallel Bottom");
+                //console.log("Clip Parallel Bottom");
                 y = -1;
                 t = (y - p0.y) / (p1.y - p0.y);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.z = p0.z + t * (p1.z - p0.z);
                 cross.y = y;
             } else if (outcode & TOP) {
-                console.log("Clip Parallel Top");
+                //console.log("Clip Parallel Top");
                 y = 1;
                 t = (y - p0.y) / (p1.y - p0.y);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.z = p0.z + t * (p1.z - p0.z);
                 cross.y = y;
             } else if (outcode & FAR) {
-                console.log("Clip Parallel Far");
+                //console.log("Clip Parallel Far");
                 z = -1;
                 t = (z - p0.z) / (p1.z - p0.z);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
                 cross.z = z;
             } else if (outcode & NEAR) {
-                console.log("Clip Parallel Near");
+                //console.log("Clip Parallel Near");
                 z = 0;
                 t = (z - p0.z) / (p1.z - p0.z);
                 cross.x = p0.x + t * (p1.x - p0.x);
@@ -512,7 +499,7 @@ function clipLineParallel(line) {
             }
         }
     }
-    console.log(result);
+    //console.log(result);
     return result;
 }
 
