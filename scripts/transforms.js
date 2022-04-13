@@ -155,7 +155,41 @@ function mat4x4MPer() {
     return mper;
 }
 
+function animate(vertex, degrees, nPer) {
 
+    //translate to center
+    var translate_center = new Matrix(4,4);
+    mat4x4Identity(translate_center);
+    mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
+            
+    // rotate theta degrees (probbaly calculated based on time)
+    var rotate_y = new Matrix(4,4);
+    mat4x4Identity(rotate_y);
+    mat4x4RotateY(rotate_y, degreesToRadians(degrees));
+            
+    // translate back to where it should be
+    var translate_back = new Matrix(4,4);
+    mat4x4Identity(translate_back);
+    mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
+            
+    // get final animation matrix
+    var mult_array = [];
+    mult_array.push(translate_back);
+    mult_array.push(rotate_y);
+    mult_array.push(translate_center);
+    
+    var rotate_matrix = Matrix.multiply(mult_array);
+    
+    let final_array = [];
+    final_array.push(vertex);
+    final_array.push(nPer);
+    final_array.push(rotate_matrix);
+
+    //return
+    var animation = Matrix.multiply(final_array);
+
+    return animation;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 // 4x4 Transform Matrices                                                         //
