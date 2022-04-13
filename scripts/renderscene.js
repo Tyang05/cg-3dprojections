@@ -92,7 +92,7 @@ function init() {
             },
             {
                 "type": "sphere",
-                "center": [-15, 40,-55],
+                "center": [-15, 45, -65],
                 "radius": 20,
                 "slices": 20,
                 "stacks": 20,
@@ -120,13 +120,75 @@ function animate(timestamp) {
     
     // step 2: transform models based on time
     // TODO: implement this!
+    var degrees = 5;
+    for (let i = 0; i < scene.models.length; i++){
+        // These if statements are converting models of specific types into generic models that hold their edges and verticies
+        // Functions being called are at the bottom of this file
+        if(scene.models[i].type == "cube") {
+            scene.models[i] = drawCube(scene.models[i]);
+        } else if(scene.models[i].type == "cone") {
+            scene.models[i] = drawCone(scene.models[i]);
+        } else if(scene.models[i].type == "cylinder") {
+            scene.models[i] = drawCylinder(scene.models[i]);
+        } else if(scene.models[i].type == "sphere") {
+            scene.models[i] = drawSphere(scene.models[i]);
+        }
+        for (let j = 0; j < scene.models[i].vertices.length; j++) {
+
+
+            // var vertex = scene.models[i].vertices[j];
+            // //take current point
+            // //translate to the center
+            var translate_center = new Matrix(4,4);
+            mat4x4Identity(translate_center);
+            mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
+            
+            // //rotate theta degrees (probbaly calculated based on time)
+            var rotate_y = new Matrix(4,4);
+            mat4x4Identity(rotate_y);
+            mat4x4RotateY(rotate_y, degreesToRadians(degrees*i));
+            
+            // //translate back to where it should be
+            var translate_back = new Matrix(4,4);
+            mat4x4Identity(translate_back);
+            mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
+            
+            // //overwrite with where the new vertex should be
+            var mult_array = [];
+            mult_array.push(translate_back);
+            mult_array.push(rotate_y);
+            mult_array.push(translate_center);
+            
+            var rotate_matrix = Matrix.multiply(mult_array);
+            var rotated_point = rotate_matrix.mult(vertex);
+            // console.log(rotate_matrix);
+
+            //console.log(scene.models[i].vertices[j]);
+            //let returning = newThingy.mult(scene.models[i].vertices[j]);
+            // console.log(returning);
+            // scene.models[i].vertices[j].x = returning[0];
+            // scene.models[i].vertices[j].y = returning[1];
+            // scene.models[i].vertices[j].z = returning[2];
+            // scene.models[i].vertices[j].w = returning[3];
+            // console.log(scene.models[i].vertices[j]);
+            // let idkanymoreman = Vector4(returning[0], returning[1], returning[2], returning[3]);
+            // console.log(translate_center)
+            //console.log(final);
+
+            // scene.models[i].vertices[j] = idkanymoreman;
+
+        }
+    }
+
 
     // step 3: draw scene
     drawScene();
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-     //window.requestAnimationFrame(animate);
+    //setTimeout(() => {
+        //window.requestAnimationFrame(animate); 
+    //}, 100);
 }
 
 // Main drawing code - use information contained in variable `scene`
@@ -149,17 +211,7 @@ function drawPerspective() {
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
-        // These if statements are converting models of specific types into generic models that hold their edges and verticies
-        // Functions being called are at the bottom of this file
-        if(scene.models[i].type == "cube") {
-            scene.models[i] = drawCube(scene.models[i]);
-        } else if(scene.models[i].type == "cone") {
-            scene.models[i] = drawCone(scene.models[i]);
-        } else if(scene.models[i].type == "cylinder") {
-            scene.models[i] = drawCylinder(scene.models[i]);
-        } else if(scene.models[i].type == "sphere") {
-            scene.models[i] = drawSphere(scene.models[i]);
-        }
+        
         // The set of vertices for the current model
         let verticesTemp = [];
         // For loop iterate through all the vertices and multiply by nPer
@@ -249,6 +301,7 @@ function drawParallel() {
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
             verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+            
         }
         // Add vertices to the verticesTemp
         vertices.push(verticesTemp);
@@ -605,7 +658,26 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            break;
+            // Translate prp to origin
+            let originPRP = new Vector3(-scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+            // Set prp to origin
+            scene.view.prp = originPRP;
+
+            // Rotate Matrix around v-axis
+            identity = new Matrix(4,4);
+            mat4x4Identity(identity);
+            mat4x4RotateY(identity, 25);
+            
+             var holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1);
+             holdSRP = identity.mult(holdSRP);
+             console.log(holdSRP);
+             var newSRP = new Vector3();
+             newSRP.x = holdSRP.x;
+             
+             console.log(newSRP);
+
+             scene.view.srp = holdSRP;
+             break;
         case 39: // RIGHT Arrow
             console.log("right");
             break;
@@ -835,8 +907,6 @@ function drawCylinder(modelCylinder) {
 
 function drawSphere(modelSphere) {
     var sphere = generic();
-    sphere.edges = [];
-    sphere.vertices = [];
     var n = modelSphere.stacks;
     var radius = modelSphere.radius;
     var center = [0,0,0]; //instead of translating it, just calculate then translate
@@ -882,9 +952,12 @@ function drawSphere(modelSphere) {
     for (var i=0; i<sphere.vertices.length; i++){
         if ((i+1)%(modelSphere.stacks*2) != 0 && (i) % (modelSphere.stacks*2) != 19){
             sphere.edges.push([i,i+1]);
-
         } 
     }
     
     return sphere;
 }
+
+
+
+
