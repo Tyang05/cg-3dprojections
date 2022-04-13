@@ -184,7 +184,7 @@ function animate(timestamp) {
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
     //setTimeout(() => {
-        //window.requestAnimationFrame(animate); 
+        window.requestAnimationFrame(animate);
     //}, 100);
 }
 
@@ -435,13 +435,7 @@ function clipLineParallel(line) {
             } else {
                 outcode = out1;
             }
-            
 
-            /* BOUNDS: 
-            LEFT: x = -1, RIGHT: x = 1
-            BOTTOM: y = -1, TOP: y = 1
-            FAR: z = -1, NEAR z = 0
-            */
             let x,y,z,t = null;
             let dx = p1.x - p0.x;
             let dy = p1.y - p0.y;
@@ -544,7 +538,10 @@ function clipLinePerspective(line, z_min) {
             // Check via RIGHT plane, calculate its new interception points and decrement outcode
             else if(outcode & RIGHT) {
                                     // Flipped points for negative change in slope
-                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p0.z - p1.z));
+                let delta_x = p1.x - p0.x;
+                let delta_y = p1.y - p0.y;
+
+                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -561,7 +558,7 @@ function clipLinePerspective(line, z_min) {
             // Check via TOP plane, calculate its new interception points and decrement outcode
             else if(outcode & TOP) {
                                     // Flipped points for negative change in slope
-                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p0.z - p1.z));
+                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -570,7 +567,7 @@ function clipLinePerspective(line, z_min) {
             // Check via FAR plane, calculate its new interception points and decrement outcode
             else if(outcode & FAR) {
                 // Flipped points for negative change in slope
-                t = (p0.z - z_min) / (p0.z- p1.z);
+                t = (-p0.z - 1) / (p1.z - p0.z);
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -578,7 +575,8 @@ function clipLinePerspective(line, z_min) {
             }
             // Check via NEAR plane, calculate its new interception points and decrement outcode
             else {
-                t = (-p0.z - 1) / (p1.z- p0.z);
+                t = (p0.z - z_min) / (p0.z - p1.z);
+
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -629,26 +627,18 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            // Translate prp to origin
-            let originPRP = new Vector3(-scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
-            // Set prp to origin
-            scene.view.prp = originPRP;
+            // Translate SRP to PRP
+            let transformation = new Matrix(4, 4);
+            mat4x4Identity(transformation);
+            mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
 
-            // Rotate Matrix around v-axis
-            identity = new Matrix(4,4);
-            mat4x4Identity(identity);
-            mat4x4RotateY(identity, 25);
-            
-             var holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1);
-             holdSRP = identity.mult(holdSRP);
-             console.log(holdSRP);
-             var newSRP = new Vector3();
-             newSRP.x = holdSRP.x;
-             
-             console.log(newSRP);
+            mat4x4RotateV(transformation, v, 25);
 
-             scene.view.srp = holdSRP;
-             break;
+            mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+
+            transformation
+
+            break;
         case 39: // RIGHT Arrow
             console.log("right");
             break;
