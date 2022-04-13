@@ -25,7 +25,6 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     let rotate = new Matrix(4, 4);
     mat4x4Identity(rotate);
     mat4x4PerspectiveRotate(rotate, u, v, n);
-    //console.log("rotate: " + rotate);
 
     // 3. shear such that CW is on the z-axis
     let left = clip[0];
@@ -54,10 +53,10 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     //console.log("tpar: " + tpar);
 
     // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
-    let Sper = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
+    let Spar = new Vector3((2/(right-left)), (2/(top-bottom)), (1/far));
     let scale = new Matrix(4, 4);
     mat4x4Identity(scale);
-    mat4x4Scale(scale, Sper.x, Sper.y, Sper.z);
+    mat4x4Scale(scale, Spar.x, Spar.y, Spar.z);
     //console.log("scale: " + scale);
 
     // Create an array of Matrices

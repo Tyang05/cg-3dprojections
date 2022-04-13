@@ -356,32 +356,6 @@ function drawParallel() {
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
                 }
-
-                /*
-                // Set points to be a vector that contain the newly clipped values
-                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
-                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
-
-                // Multiply the points by mPer (turn into view scene)
-                let mPer = mat4x4MPar();
-                pt0 = mPer.mult(pt0);
-                pt1 = mPer.mult(pt1);
-
-                // Convert points to to World Coordinate
-                let viewToWorld = new Matrix(4,4);
-                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
-                pt0 = viewToWorld.mult(pt0);
-                pt1 = viewToWorld.mult(pt1);
-
-                // Define points values to draw
-                let x1 = pt0.data[0] / pt0.data[3];
-                let y1 = pt0.data[1] / pt0.data[3]
-                let x2 = pt1.data[0] / pt1.data[3];
-                let y2 = pt1.data[1] / pt1.data[3]
-
-                // Draw the line
-                drawLine(x1, y1, x2, y2);
-                */
             }
         }
         counter++;
