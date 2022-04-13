@@ -264,6 +264,7 @@ function drawParallel() {
                 
                 // Clip the line
                 line = clipLineParallel(points);
+                //line = points;
 
                 if (line!=null) {
                     // Set points to be a vector that contain the newly clipped values
@@ -277,25 +278,20 @@ function drawParallel() {
                     let mPer = mat4x4MPar();
                     console.log(mPer);
 
-                    pt0 = mPer.mult(pt0);
-                    console.log(pt0);
-                    pt1 = mPer.mult(pt1);
-                    console.log(pt1);
-
                     // Convert points to to World Coordinate
                     let viewToWorld = new Matrix(4,4);
                     mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
                     console.log(viewToWorld);
-                    pt0 = viewToWorld.mult(pt0);
+                    pt0 = Matrix.multiply([viewToWorld, mPer, pt0]);
                     console.log(pt0);
-                    pt1 = viewToWorld.mult(pt1);
+                    pt1 = Matrix.multiply([viewToWorld, mPer, pt1]);
                     console.log(pt1);
 
                     // Define points values to draw
-                    let x1 = pt0.data[0] / pt0.data[3];
-                    let y1 = pt0.data[1] / pt0.data[3];
-                    let x2 = pt1.data[0] / pt1.data[3];
-                    let y2 = pt1.data[1] / pt1.data[3];
+                    let x1 = pt0.x / pt0.w; 
+                    let y1 = pt0.y / pt0.w;
+                    let x2 = pt1.x / pt1.w;
+                    let y2 = pt1.y / pt1.w;
 
                     console.log(x1);
                     console.log(x2);
@@ -411,7 +407,7 @@ function clipLineParallel(line) {
         } else {
             let theEnd = null;
             let outcode = 0;
-            if (out0 == 0 & out1 != 0) {
+            if (out0 == 0 && out1 != 0) {
                 outcode = out1;
                 theEnd = p1;
             } else {
@@ -426,46 +422,52 @@ function clipLineParallel(line) {
             FAR: z = -1, NEAR z = 0
             */
             let x,y,z,t = null;
-            let cross = new Vector3(0,0,0,);
+            let cross = new Vector3(0,0,0);
             if (outcode & LEFT) {
                 console.log("Clip Parallel Left");
                 x = -1;
                 t = (x - p0.x) / (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
                 cross.z = p0.z + t * (p1.z - p0.z);
+                cross.x = x;
             } else if (outcode & RIGHT) {
                 console.log("Clip Parallel Right");
                 x = 1;
                 t = (x - p0.x) / (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
                 cross.z = p0.z + t * (p1.z - p0.z);
+                cross.x = x;
             } else if (outcode & BOTTOM) {
                 console.log("Clip Parallel Bottom");
                 y = -1;
                 t = (y - p0.y) / (p1.y - p0.y);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.z = p0.z + t * (p1.z - p0.z);
+                cross.y = y;
             } else if (outcode & TOP) {
                 console.log("Clip Parallel Top");
                 y = 1;
                 t = (y - p0.y) / (p1.y - p0.y);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.z = p0.z + t * (p1.z - p0.z);
+                cross.y = y;
             } else if (outcode & FAR) {
                 console.log("Clip Parallel Far");
                 z = -1;
                 t = (z - p0.z) / (p1.z - p0.z);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
+                cross.z = z;
             } else if (outcode & NEAR) {
                 console.log("Clip Parallel Near");
                 z = 0;
                 t = (z - p0.z) / (p1.z - p0.z);
                 cross.x = p0.x + t * (p1.x - p0.x);
                 cross.y = p0.y + t * (p1.y - p0.y);
+                cross.z = z;
             }
 
-            if(theEnd == p0) {
+            if(outcode == out0) {
                 p0 = cross;
                 out0 = outcodeParallel(p0);
             }
