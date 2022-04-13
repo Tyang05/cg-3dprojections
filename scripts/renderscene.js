@@ -24,27 +24,35 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            //type: 'perspective',
-            type: 'parallel',
+            /*
+            type: 'perspective',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
             clip: [-19, 5, -10, 8, 12, 100]
+            */
+            
+            type: "parallel",
+            prp: Vector3(44, 20, -21),
+            srp: Vector3(20, 20, -45),
+            vup: Vector3(0, 1, 0),
+            clip: [-15, 5, -10, 10, 12, 100]
         },
         models: [
             {
                 type: 'generic',
                 vertices: [
-                    Vector4( 0,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
-                    Vector4(20,  0, -30, 1), // 1
-                    Vector4(20, 12, -30, 1), // 2
-                    Vector4(10, 20, -30, 1), // 3
-                    Vector4( 0, 12, -30, 1), // 4
-                    Vector4( 0,  0, -60, 1), // 5
-                    Vector4(20,  0, -60, 1), // 6
-                    Vector4(20, 12, -60, 1), // 7 
-                    Vector4(10, 20, -60, 1), // 8
-                    Vector4( 0, 12, -60, 1)  // 9
+                    Vector4( 20,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
+                    Vector4(20,  12, -30, 1), // 1
+                    Vector4(10, 20, -30, 1), // 2
+                    Vector4(0, 12, -30, 1), // 3
+                    Vector4( 0, 0, -30, 1), // 4
+                    
+                    Vector4( 20,  0, -60, 1), // 5
+                    Vector4(20,  12, -60, 1), // 6
+                    Vector4(10, 20, -60, 1), // 7 
+                    Vector4(0, 12, -60, 1), // 8
+                    Vector4( 0, 0, -60, 1)  // 9
                 ],
                 edges: [
                     [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
