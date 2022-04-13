@@ -617,11 +617,11 @@ function onKeyDown(event) {
             // Translate SRP to PRP
             let transformation = new Matrix(4, 4);
             mat4x4Identity(transformation);
-            mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
-
-            mat4x4RotateV(transformation, v, 25);
-
             mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+
+            mat4x4RotateV(transformation, v, degreesToRadians(5));
+
+            mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
 
             let holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );
 
