@@ -56,51 +56,51 @@ function init() {
                 ],
                 matrix: new Matrix(4, 4)
             },  
-            {
-                "type": 'cube',
-                "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
-                "width": 10,
-                "height": 10,
-                "depth": 10,
-                 "animation": {
-                        "axis": "y",
-                        "rps": 0.5
-                    }
+            // {
+            //     "type": 'cube',
+            //     "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+            //     "width": 10,
+            //     "height": 10,
+            //     "depth": 10,
+            //      "animation": {
+            //             "axis": "y",
+            //             "rps": 0.5
+            //         }
             
-            },
-            {
-                "type": "cone",
-                "center": [-30, 10, -30],
-                "radius": 10,
-                "height": 50,
-                "sides": 50,
-                "animation": {
-                             "axis": "y",
-                             "rps": 0.5
-                         }
-            },
-            {
-                "type": "cylinder",
-                "center": [-30, 25, -10],
-                "radius": 5,
-                "height": 40,
-                "sides": 50,
-                "animation": {
-                    "axis": "y",
-                    "rps": 0.5
-                }
-            },
-            {
-                "type": "sphere",
-                "center": [-15, 45, -65],
-                "radius": 20,
-                "slices": 20,
-                "stacks": 20,
-                "animation": {
-                    "axis": "y",
-                    "rps": 0.5
-                }
-            }
+            // },
+            // {
+            //     "type": "cone",
+            //     "center": [-30, 10, -30],
+            //     "radius": 10,
+            //     "height": 50,
+            //     "sides": 50,
+            //     "animation": {
+            //                  "axis": "y",
+            //                  "rps": 0.5
+            //              }
+            // },
+            // {
+            //     "type": "cylinder",
+            //     "center": [-30, 25, -10],
+            //     "radius": 5,
+            //     "height": 40,
+            //     "sides": 50,
+            //     "animation": {
+            //         "axis": "y",
+            //         "rps": 0.5
+            //     }
+            // },
+            // {
+            //     "type": "sphere",
+            //     "center": [-15, 45, -65],
+            //     "radius": 20,
+            //     "slices": 20,
+            //     "stacks": 20,
+            //     "animation": {
+            //         "axis": "y",
+            //         "rps": 0.5
+            //     }
+            // }
         ]
     };
 
@@ -120,7 +120,7 @@ function animate(timestamp) {
     
     // step 2: transform models based on time
     // TODO: implement this!
-    var degrees = 5;
+    
     for (let i = 0; i < scene.models.length; i++){
         // These if statements are converting models of specific types into generic models that hold their edges and verticies
         // Functions being called are at the bottom of this file
@@ -135,47 +135,44 @@ function animate(timestamp) {
         }
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
 
-
-            // var vertex = scene.models[i].vertices[j];
-            // //take current point
-            // //translate to the center
-            var translate_center = new Matrix(4,4);
+            var vertex = scene.models[i].vertices[j];
+            var degrees = 5;
+            // take current point
+            // translate to the center
+            var  translate_center = new Matrix(4,4);
             mat4x4Identity(translate_center);
             mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
             
-            // //rotate theta degrees (probbaly calculated based on time)
-            var rotate_y = new Matrix(4,4);
+            // rotate theta degrees (probbaly calculated based on time)
+            let rotate_y = new Matrix(4,4);
             mat4x4Identity(rotate_y);
-            mat4x4RotateY(rotate_y, degreesToRadians(degrees*i));
+            mat4x4RotateY(rotate_y, degreesToRadians(degrees));
+            //console.log(rotate_y);
             
-            // //translate back to where it should be
+            // translate back to where it should be
             var translate_back = new Matrix(4,4);
             mat4x4Identity(translate_back);
             mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
             
-            // //overwrite with where the new vertex should be
+            // combine into one translation matrix
             var mult_array = [];
             mult_array.push(translate_back);
             mult_array.push(rotate_y);
             mult_array.push(translate_center);
+            var animate_matrix = Matrix.multiply(mult_array);
+            //console.log(animate_matrix);
+
+            // calculate new point and overwrite old point
             
-            var rotate_matrix = Matrix.multiply(mult_array);
-            var rotated_point = rotate_matrix.mult(vertex);
-            // console.log(rotate_matrix);
+            var rotated_point = animate_matrix.mult(scene.models[i].vertices[j]);
+            //console.log(rotated_point);
+
+            // console.log(scene.models[i].vertices[j]);
+            let new_vector = Vector4(rotated_point.values[0], rotated_point.values[1], rotated_point.values[2], rotated_point.values[3]);
 
             //console.log(scene.models[i].vertices[j]);
-            //let returning = newThingy.mult(scene.models[i].vertices[j]);
-            // console.log(returning);
-            // scene.models[i].vertices[j].x = returning[0];
-            // scene.models[i].vertices[j].y = returning[1];
-            // scene.models[i].vertices[j].z = returning[2];
-            // scene.models[i].vertices[j].w = returning[3];
-            // console.log(scene.models[i].vertices[j]);
-            // let idkanymoreman = Vector4(returning[0], returning[1], returning[2], returning[3]);
-            // console.log(translate_center)
-            //console.log(final);
-
-            // scene.models[i].vertices[j] = idkanymoreman;
+            scene.models[i].vertices[j] = new_vector;
+            //console.log(scene.models[i].vertices[j]);
 
         }
     }
