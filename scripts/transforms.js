@@ -155,12 +155,13 @@ function mat4x4MPer() {
     return mper;
 }
 
-function rotate_animate(vertex, degrees, nPer) {
-
+function please_animate(vertex, degrees, nMatrix, center) {
+    
     //translate to center
     var translate_center = new Matrix(4,4);
     mat4x4Identity(translate_center);
-    mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
+    mat4x4Translate(translate_center, -center.x, -center.y, -center.z);
+    
     // rotate theta degrees (calculated based on time)
     var rotate_y = new Matrix(4,4);
     mat4x4Identity(rotate_y);
@@ -169,7 +170,7 @@ function rotate_animate(vertex, degrees, nPer) {
     // translate back to where it should be
     var translate_back = new Matrix(4,4);
     mat4x4Identity(translate_back);
-    mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
+    mat4x4Translate(translate_back, center.x, center.y, center.z);
             
     // get final animation matrix
     var mult_array = [];
@@ -179,17 +180,15 @@ function rotate_animate(vertex, degrees, nPer) {
     
     var rotate_matrix = Matrix.multiply(mult_array);
     
+
+    //multiply the rotation matrix, nMatrix and current vertex togther for where it should be
     let final_array = [];
+    final_array.push(nMatrix);
     final_array.push(rotate_matrix);
-    final_array.push(nPer);
     final_array.push(vertex);
     var animation = Matrix.multiply(final_array);
     
-    console.log(rotate_matrix);
-    console.log(nPer);
-    console.log(animation);
 
-    //return
     return animation;
 }
 

@@ -58,19 +58,18 @@ function init() {
             },  
             // {
             //     "type": 'cube',
-            //     "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+            //     "center": Vector3(10, 0, -20), 
             //     "width": 10,
             //     "height": 10,
             //     "depth": 10,
-            //      "animation": {
-            //             "axis": "y",
-            //             "rps": 0.5
+            //     "animation": {
+            //            "axis": "y",
+            //            "rps": 0.5
             //         }
-            
             // },
             // {
             //     "type": "cone",
-            //     "center": [-30, 10, -30],
+            //     "center": Vector3(-30, 10, -30),
             //     "radius": 10,
             //     "height": 50,
             //     "sides": 50,
@@ -81,7 +80,7 @@ function init() {
             // },
             // {
             //     "type": "cylinder",
-            //     "center": [-30, 25, -10],
+            //     "center": Vector3(-30, 25, -10),
             //     "radius": 5,
             //     "height": 40,
             //     "sides": 50,
@@ -92,7 +91,7 @@ function init() {
             // },
             // {
             //     "type": "sphere",
-            //     "center": [-15, 45, -65],
+            //     "center": Vector3(-15, 45, -65),
             //     "radius": 20,
             //     "slices": 20,
             //     "stacks": 20,
@@ -133,19 +132,21 @@ function animate(timestamp) {
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
+    ctx.clearRect(0,0,view.width, view.height);
     if (scene.view.type == "perspective") {
         drawPerspective();
     } else {
         drawParallel();
     }
 }
-
+var degrees =0;
 function drawPerspective() {
+    
     // For each model, for each edge
-    var degrees = 5;
+    degrees++;
     var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
 
-   
+    //console.log(degrees);
 
     // The vertices array which contains sets of vertices from each individual models.
     // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
@@ -164,17 +165,17 @@ function drawPerspective() {
             scene.models[i] = drawCylinder(scene.models[i]);
         } else if(scene.models[i].type == "sphere") {
             scene.models[i] = drawSphere(scene.models[i]);
+        } else if(scene.models[i].type == "generic" ){
+            scene.models[i].center  = Vector3(10,10,-45);
         }
         // The set of vertices for the current model
         let verticesTemp = [];
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
-
-            //verticesTemp[j] = rotate_animate(scene.models[i].vertices[j], degrees, nPer);
-            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
-            
+            verticesTemp[j] = please_animate(scene.models[i].vertices[j], degrees, nPer,scene.models[i].center);
+            //verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]); 
         }
-        // Add vertices to the verticesTemp
+        // add the newly calculated model's vertices to the new list of vertices 
         vertices.push(verticesTemp);
     }
 
@@ -529,7 +530,10 @@ function clipLinePerspective(line, z_min) {
             // Check via RIGHT plane, calculate its new interception points and decrement outcode
             else if(outcode & RIGHT) {
                                     // Flipped points for negative change in slope
-                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p0.z - p1.z));
+                let delta_x = p1.x - p0.x;
+                let delta_y = p1.y - p0.y;
+
+                t = (p0.x + p0.z) / ((p0.x - p1.x) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -546,7 +550,7 @@ function clipLinePerspective(line, z_min) {
             // Check via TOP plane, calculate its new interception points and decrement outcode
             else if(outcode & TOP) {
                                     // Flipped points for negative change in slope
-                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p0.z - p1.z));
+                t = (p0.y + p0.z) / ((p0.y - p1.y) - (p1.z - p0.z));
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -555,7 +559,7 @@ function clipLinePerspective(line, z_min) {
             // Check via FAR plane, calculate its new interception points and decrement outcode
             else if(outcode & FAR) {
                 // Flipped points for negative change in slope
-                t = (p0.z - z_min) / (p0.z- p1.z);
+                t = (-p0.z - 1) / (p1.z - p0.z);
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -563,7 +567,8 @@ function clipLinePerspective(line, z_min) {
             }
             // Check via NEAR plane, calculate its new interception points and decrement outcode
             else {
-                t = (-p0.z - 1) / (p1.z- p0.z);
+                t = (p0.z - z_min) / (p0.z - p1.z);
+
 
                 x = ((1-t) * p0.x) + (t * p1.x);
                 y = ((1-t) * p0.y) + (t * p1.y);
@@ -619,7 +624,7 @@ function onKeyDown(event) {
             mat4x4Identity(transformation);
             mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
 
-            mat4x4RotateV(transformation, v, degreesToRadians(5));
+            mat4x4RotateV(transformation, v, 25);//degreesToRadians(25));
 
             mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
 
