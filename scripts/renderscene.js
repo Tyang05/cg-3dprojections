@@ -56,51 +56,51 @@ function init() {
                 ],
                 matrix: new Matrix(4, 4)
             },  
-            // {
-            //     "type": 'cube',
-            //     "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
-            //     "width": 10,
-            //     "height": 10,
-            //     "depth": 10,
-            //      "animation": {
-            //             "axis": "y",
-            //             "rps": 0.5
-            //         }
+             {
+                 "type": 'cube',
+                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
+                 "width": 10,
+                 "height": 10,
+                 "depth": 10,
+                  "animation": {
+                         "axis": "y",
+                         "rps": 0.5
+                     }
             
-            // },
-            // {
-            //     "type": "cone",
-            //     "center": [-30, 10, -30],
-            //     "radius": 10,
-            //     "height": 50,
-            //     "sides": 50,
-            //     "animation": {
-            //                  "axis": "y",
-            //                  "rps": 0.5
-            //              }
-            // },
-            // {
-            //     "type": "cylinder",
-            //     "center": [-30, 25, -10],
-            //     "radius": 5,
-            //     "height": 40,
-            //     "sides": 50,
-            //     "animation": {
-            //         "axis": "y",
-            //         "rps": 0.5
-            //     }
-            // },
-            // {
-            //     "type": "sphere",
-            //     "center": [-15, 45, -65],
-            //     "radius": 20,
-            //     "slices": 20,
-            //     "stacks": 20,
-            //     "animation": {
-            //         "axis": "y",
-            //         "rps": 0.5
-            //     }
-            // }
+             },
+             {
+                 "type": "cone",
+                 "center": [-30, 10, -30],
+                 "radius": 10,
+                 "height": 50,
+                 "sides": 50,
+                 "animation": {
+                              "axis": "y",
+                              "rps": 0.5
+                          }
+             },
+             {
+                 "type": "cylinder",
+                 "center": [-30, 25, -10],
+                 "radius": 5,
+                 "height": 40,
+                 "sides": 50,
+                 "animation": {
+                     "axis": "y",
+                     "rps": 0.5
+                 }
+             },
+             {
+                 "type": "sphere",
+                 "center": [-15, 45, -65],
+                 "radius": 20,
+                 "slices": 20,
+                 "stacks": 20,
+                 "animation": {
+                     "axis": "y",
+                     "rps": 0.5
+                 }
+             }
         ]
     };
 
@@ -627,24 +627,47 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
+            let hold_SRP_Left = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );  
+
             // Translate SRP to PRP
-            let transformation = new Matrix(4, 4);
-            mat4x4Identity(transformation);
-            mat4x4Translate(transformation, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
+            let transformation_Left = new Matrix(4, 4);
+            mat4x4Identity(transformation_Left);
+            mat4x4Translate(transformation_Left, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
 
-            mat4x4RotateV(transformation, v, 25);
+            mat4x4Identity(transformation_Left);
+            mat4x4RotateV(transformation_Left, v, degreesToRadians(2));
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
 
-            mat4x4Translate(transformation, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
-
-            let holdSRP = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );
-
-            holdSRP = transformation.mult(holdSRP);
-            let newSRP = new Vector3(holdSRP.data[0], holdSRP.data[1], holdSRP.data[2]);
-            scene.view.srp = newSRP;
+            mat4x4Identity(transformation_Left);
+            mat4x4Translate(transformation_Left, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
+            hold_SRP_Left = transformation_Left.mult(hold_SRP_Left);
+ 
+            let new_SRP_Left = new Vector3(hold_SRP_Left.data[0], hold_SRP_Left.data[1], hold_SRP_Left.data[2]);
+            scene.view.srp = new_SRP_Left;
             ctx.clearRect(0,0, view.width, view.height);
             break;
         case 39: // RIGHT Arrow
             console.log("right");
+            let hold_SRP_Right = new Vector4(scene.view.srp.x, scene.view.srp.y, scene.view.srp.z, 1 );  
+
+            // Translate SRP to PRP
+            let transformation_Right = new Matrix(4, 4);
+            mat4x4Identity(transformation_Right);
+            mat4x4Translate(transformation_Right, -scene.view.prp.x, -scene.view.prp.y, -scene.view.prp.z);
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            mat4x4Identity(transformation_Right);
+            mat4x4RotateV(transformation_Right, v, degreesToRadians(-2));
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            mat4x4Identity(transformation_Right);
+            mat4x4Translate(transformation_Right, scene.view.prp.x, scene.view.prp.y, scene.view.prp.z);
+            hold_SRP_Right = transformation_Right.mult(hold_SRP_Right);
+
+            let new_SRP_Right = new Vector3(hold_SRP_Right.data[0], hold_SRP_Right.data[1], hold_SRP_Right.data[2]);
+            scene.view.srp = new_SRP_Right;
+            ctx.clearRect(0,0, view.width, view.height);
             break;
         case 65: // A key
             console.log("A");
