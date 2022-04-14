@@ -23,21 +23,14 @@ function init() {
 
     // initial scene... feel free to change this
     scene = {
+
+        /*
         view: {
-            
             type: 'perspective',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
             clip: [-19, 5, -10, 8, 12, 100]
-            
-            
-            /*type: "parallel",
-            prp: Vector3(10, 9, 0),
-            srp: Vector3(10, 9, -30),
-            vup: Vector3(0, 1, 0),
-            clip: [-11, 11, -11, 11, 30, 100]
-            */
         },
         models: [
             {
@@ -115,7 +108,95 @@ function init() {
                 }
             }
         ]
-    };
+    };           //*/
+
+    
+    view: {
+        type: "parallel",
+        prp: Vector3(10, 9, 0),
+        srp: Vector3(10, 9, -30),
+        vup: Vector3(0, 1, 0),
+        clip: [-11, 11, -11, 11, 30, 100]
+        
+    },
+        models: [
+        {
+            type: 'generic',
+            vertices: [
+                Vector4( 20,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
+                Vector4(20,  12, -30, 1), // 1
+                Vector4(10, 20, -30, 1), // 2
+                Vector4(0, 12, -30, 1), // 3
+                Vector4( 0, 0, -30, 1), // 4
+                
+                Vector4( 20,  0, -60, 1), // 5
+                Vector4(20,  12, -60, 1), // 6
+                Vector4(10, 20, -60, 1), // 7 
+                Vector4(0, 12, -60, 1), // 8
+                Vector4( 0, 0, -60, 1)  // 9
+            ],
+            edges: [
+                [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
+                [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
+                [0, 5], // 2 
+                [1, 6], // 3
+                [2, 7],
+                [3, 8],
+                [4, 9]
+            ],
+            matrix: new Matrix(4, 4),
+            "animation": {
+                         "axis": "y",
+                         "rps": .5
+                     }
+        },  
+        {
+            "type": 'cube',
+            "center": [17, 5, -20], 
+            "width": 3,
+            "height": 3,
+            "depth": 3,
+            "animation": {
+                   "axis": "y",
+                   "rps": 1
+            }
+        },
+        {
+            "type": "cone",
+            "center": [15, 9, -30],
+            "radius": 2,
+            "height": 5,
+            "sides": 50,
+            "animation": {
+                "axis": "y",
+                "rps": 2
+            }
+        },
+        {
+            "type": "cylinder",
+            "center": [10, 16, -10],
+            "radius": 2,
+            "height": 6,
+            "sides": 50,
+            "animation": {
+                "axis": "y",
+                "rps": 3
+            }
+        },
+        {
+            "type": "sphere",
+            "center": [5, 7, -65],
+            "radius": 5,
+            "slices": 20,
+            "stacks": 20,
+            "animation": {
+                "axis": "y",
+                "rps": 4
+            }
+        }
+    ]
+    
+};                 
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
