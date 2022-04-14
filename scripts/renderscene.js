@@ -33,7 +33,6 @@ function init() {
             */
             
             type: "parallel",
-            //type: 'perspective',
             prp: Vector3(10, 9, 0),
             srp: Vector3(10, 9, -30),
             vup: Vector3(0, 1, 0),
