@@ -24,19 +24,20 @@ function init() {
     // initial scene... feel free to change this
     scene = {
         view: {
-            /*
+            
             type: 'perspective',
             prp: Vector3(44, 20, -16),
             srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
             clip: [-19, 5, -10, 8, 12, 100]
-            */
             
-            type: "parallel",
+            
+            /*type: "parallel",
             prp: Vector3(10, 9, 0),
             srp: Vector3(10, 9, -30),
             vup: Vector3(0, 1, 0),
             clip: [-11, 11, -11, 11, 30, 100]
+            */
         },
         models: [
             {
