@@ -24,7 +24,7 @@ function init() {
     // initial scene... feel free to change this
     scene = {
 
-        /*
+
         view: {
             type: 'perspective',
             prp: Vector3(44, 20, -16),
@@ -108,9 +108,9 @@ function init() {
                 }
             }
         ]
-    };           //*/
+    };           //
 
-    
+   /*
     view: {
         type: "parallel",
         prp: Vector3(10, 9, 0),
@@ -194,9 +194,9 @@ function init() {
                 "rps": 4
             }
         }
-    ]
+    ]*/
     
-};                 
+//};
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
@@ -210,13 +210,13 @@ function init() {
 // Animation loop - repeatedly calls rendering code
 function animate(timestamp) {
     // step 1: calculate time (time since start)
-    let time = timestamp - start_time;
+    let time = (timestamp - start_time) / 1000.0;
     
     // step 2: transform models based on time
     // TODO: implement this!
-    var degrees = time;
+   // var degrees = time;
     // step 3: draw scene
-    drawScene(degrees);
+    drawScene(time);
     
 
     // step 4: request next animation frame (recursively calling same function)
@@ -227,15 +227,15 @@ function animate(timestamp) {
 }
 
 // Main drawing code - use information contained in variable `scene`
-function drawScene(degrees) {
+function drawScene(time) {
     ctx.clearRect(0,0,view.width, view.height);
     if (scene.view.type == "perspective") {
-        drawPerspective(degrees);
+        drawPerspective(time);
     } else {
         drawParallel();
     }
 }
-function drawPerspective(degrees) {
+function drawPerspective(time) {
     
     // For each model, for each edge
     var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
@@ -270,6 +270,8 @@ function drawPerspective(degrees) {
         
         // The set of vertices for the current model
         let verticesTemp = [];
+        let degrees = 360 * scene.models[i].animation.rps * time;
+        console.log(degrees);
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
             verticesTemp[j] = please_animate(scene.models[i].vertices[j], degrees, nPer, scene.models[i].center);
