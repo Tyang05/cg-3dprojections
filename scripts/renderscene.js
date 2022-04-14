@@ -64,53 +64,56 @@ function init() {
                     [3, 8],
                     [4, 9]
                 ],
-                matrix: new Matrix(4, 4)
+                matrix: new Matrix(4, 4),
+                "animation": {
+                             "axis": "y",
+                             "rps": .5
+                         }
             },  
-             /*{
-                 "type": 'cube',
-                 "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
-                 "width": 10,
-                 "height": 10,
-                 "depth": 10,
-                  "animation": {
-                         "axis": "y",
-                         "rps": 0.5
-                     }
-            
-             }/*,
-             {
-                 "type": "cone",
-                 "center": [-30, 10, -30],
-                 "radius": 10,
-                 "height": 50,
-                 "sides": 50,
-                 "animation": {
-                              "axis": "y",
-                              "rps": 0.5
-                          }
-             },
-             {
-                 "type": "cylinder",
-                 "center": [-30, 25, -10],
-                 "radius": 5,
-                 "height": 40,
-                 "sides": 50,
-                 "animation": {
-                     "axis": "y",
-                     "rps": 0.5
-                 }
-             },*/
-             {
-                 "type": "sphere",
-                 "center": [-10, 0, -20],
-                 "radius": 20,
-                 "slices": 20,
-                 "stacks": 20,
-                 "animation": {
-                     "axis": "y",
-                     "rps": 0.5
-                 }
-             }
+            {
+                "type": 'cube',
+                "center": [10, 0, -20], 
+                "width": 10,
+                "height": 10,
+                "depth": 10,
+                "animation": {
+                       "axis": "y",
+                       "rps": 1
+                }
+            },
+            {
+                "type": "cone",
+                "center": [-30, 10, -30],
+                "radius": 10,
+                "height": 50,
+                "sides": 50,
+                "animation": {
+                    "axis": "y",
+                    "rps": 2
+                }
+            },
+            {
+                "type": "cylinder",
+                "center": [-30, 25, -10],
+                "radius": 5,
+                "height": 40,
+                "sides": 50,
+                "animation": {
+                    "axis": "y",
+                    "rps": 3
+                }
+            },
+            {
+                "type": "sphere",
+                "center": [-15, 45, -65],
+                "radius": 20,
+                "slices": 20,
+                "stacks": 20,
+                "animation": {
+                    "axis": "y",
+                    "rps": 4
+                }
+            }
         ]
     };
 
@@ -130,7 +133,40 @@ function animate(timestamp) {
     
     // step 2: transform models based on time
     // TODO: implement this!
+    var degrees = time;
+    // step 3: draw scene
+    drawScene(degrees);
     
+
+    // step 4: request next animation frame (recursively calling same function)
+    // (may want to leave commented out while debugging initially)
+    setTimeout(() => {
+        window.requestAnimationFrame(animate); 
+    }, 1);
+}
+
+// Main drawing code - use information contained in variable `scene`
+function drawScene(degrees) {
+    ctx.clearRect(0,0,view.width, view.height);
+    if (scene.view.type == "perspective") {
+        drawPerspective(degrees);
+    } else {
+        drawParallel();
+    }
+}
+function drawPerspective(degrees) {
+    
+    // For each model, for each edge
+    var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+
+    //console.log(degrees);
+
+    // The vertices array which contains sets of vertices from each individual models.
+    // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
+    let vertices = [];
+    let counter = 0;
+    // For loop iterate and access all the given vertices
+    // Use the given vertices and multiply it by matrix(mPer)
     for (let i = 0; i < scene.models.length; i++){
         // These if statements are converting models of specific types into generic models that hold their edges and verticies
         // Functions being called are at the bottom of this file
@@ -142,90 +178,22 @@ function animate(timestamp) {
             scene.models[i] = drawCylinder(scene.models[i]);
         } else if(scene.models[i].type == "sphere") {
             scene.models[i] = drawSphere(scene.models[i]);
+        } else if(scene.models[i].type == "generic" ){
+            scene.models[i].center  = Vector3(avgX(scene.models[i]), avgY(scene.models[i]), avgZ(scene.models[i]));
         }
-        for (let j = 0; j < scene.models[i].vertices.length; j++) {
-
-            var vertex = scene.models[i].vertices[j];
-            var degrees = 5;
-            // take current point
-            // translate to the center
-            var  translate_center = new Matrix(4,4);
-            mat4x4Identity(translate_center);
-            mat4x4Translate(translate_center, -vertex.x, -vertex.y, -vertex.z, -vertex.w);
-            
-            // rotate theta degrees (probbaly calculated based on time)
-            let rotate_y = new Matrix(4,4);
-            mat4x4Identity(rotate_y);
-            mat4x4RotateY(rotate_y, degreesToRadians(degrees));
-            //console.log(rotate_y);
-            
-            // translate back to where it should be
-            var translate_back = new Matrix(4,4);
-            mat4x4Identity(translate_back);
-            mat4x4Translate(translate_back, vertex.x, vertex.y, vertex.z, vertex.w);
-            
-            // combine into one translation matrix
-            var mult_array = [];
-            mult_array.push(translate_back);
-            mult_array.push(rotate_y);
-            mult_array.push(translate_center);
-            var animate_matrix = Matrix.multiply(mult_array);
-            //console.log(animate_matrix);
-
-            // calculate new point and overwrite old point
-            
-            var rotated_point = animate_matrix.mult(scene.models[i].vertices[j]);
-            //console.log(rotated_point);
-
-            // console.log(scene.models[i].vertices[j]);
-            let new_vector = Vector4(rotated_point.values[0], rotated_point.values[1], rotated_point.values[2], rotated_point.values[3]);
-
-            //console.log(scene.models[i].vertices[j]);
-            scene.models[i].vertices[j] = new_vector;
-            //console.log(scene.models[i].vertices[j]);
-
-        }
-    }
-
-
-    // step 3: draw scene
-    drawScene();
-
-    // step 4: request next animation frame (recursively calling same function)
-    // (may want to leave commented out while debugging initially)
-    //setTimeout(() => {
-        window.requestAnimationFrame(animate);
-    //}, 100);
-}
-
-// Main drawing code - use information contained in variable `scene`
-function drawScene() {
-    if (scene.view.type == "perspective") {
-        drawPerspective();
-    } else {
-        drawParallel();
-    }
-}
-
-function drawPerspective() {
-    // For each model, for each edge
-    var nPer = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-
-    // The vertices array which contains sets of vertices from each individual models.
-    // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
-    let vertices = [];
-    let counter = 0;
-    // For loop iterate and access all the given vertices
-    // Use the given vertices and multiply it by matrix(mPer)
-    for (let i = 0; i < scene.models.length; i++){
+        //(360/scene.models[i].animation.rps);
+      
+        //(360*scene.models[i].animation.rps)/degrees;
+        console.log(scene.models[i].type);
+        console.log(scene.models[i].animation.rps);
         
         // The set of vertices for the current model
         let verticesTemp = [];
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
-            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
+            verticesTemp[j] = please_animate(scene.models[i].vertices[j], degrees, nPer, scene.models[i].center);
         }
-        // Add vertices to the verticesTemp
+        // add the newly calculated model's vertices to the new list of vertices 
         vertices.push(verticesTemp);
     }
 
@@ -363,6 +331,32 @@ function drawParallel() {
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
                 }
+
+                /*
+                // Set points to be a vector that contain the newly clipped values
+                pt0 = Vector4(line.pt0.x, line.pt0.y, line.pt0.z, line.pt0.w);
+                pt1 = Vector4(line.pt1.x, line.pt1.y, line.pt1.z, line.pt1.w);
+
+                // Multiply the points by mPer (turn into view scene)
+                let mPer = mat4x4MPar();
+                pt0 = mPer.mult(pt0);
+                pt1 = mPer.mult(pt1);
+
+                // Convert points to to World Coordinate
+                let viewToWorld = new Matrix(4,4);
+                mat4x4ProjectionToWindow(viewToWorld, view.width, view.height);
+                pt0 = viewToWorld.mult(pt0);
+                pt1 = viewToWorld.mult(pt1);
+
+                // Define points values to draw
+                let x1 = pt0.data[0] / pt0.data[3];
+                let y1 = pt0.data[1] / pt0.data[3]
+                let x2 = pt1.data[0] / pt1.data[3];
+                let y2 = pt1.data[1] / pt1.data[3]
+
+                // Draw the line
+                drawLine(x1, y1, x2, y2);
+                */
             }
         }
         counter++;
@@ -449,7 +443,13 @@ function clipLineParallel(line) {
                 outcode = out0;
                 theEnd = p0;
             }
+            
 
+            /* BOUNDS: 
+            LEFT: x = -1, RIGHT: x = 1
+            BOTTOM: y = -1, TOP: y = 1
+            FAR: z = -1, NEAR z = 0
+            */
             let x,y,z,t = null;
             let cross = new Vector3(0,0,0);
             if (outcode & LEFT) {
@@ -607,21 +607,21 @@ function clipLinePerspective(line, z_min) {
             // Check if outcode is out0, if so change out0 to become the new outcode
             // and its p0 to the new (x,y,z)
             if(outcode == out0) {
-                console.log(p0);
+                //console.log(p0);
                 p0.x = x;
                 p0.y = y;
                 p0.z = z;
-                console.log(p1);
+                //console.log(p1);
                 out0 = outcodePerspective(p0,z_min);
             }
 
             // Else, it do the same but for out1
             else {
-                console.log(p0);
+                //console.log(p0);
                 p1.x = x;
                 p1.y = y;
                 p1.z = z;
-                console.log(p1);
+                //console.log(p1);
                 out1 = outcodePerspective(p1,z_min);
             }
 
@@ -774,10 +774,15 @@ function drawLine(x1, y1, x2, y2) {
 
 function generic() {
     return {
+    center: null,
     type: "generic",
     vertices: [],
     edges: [],
-    matrix: new Matrix(4, 4)
+    matrix: new Matrix(4, 4),
+    "animation": {
+        "axis": "y",
+        "rps": 0
+    }
     }
 }
 
@@ -785,6 +790,8 @@ function generic() {
 
 function drawCube(modelCube) {
     var cube = generic();
+    cube.center = modelCube.center;
+    cube.animation.rps = modelCube.animation.rps;
     let center = modelCube.center;
     let height = modelCube.height;
     let width = modelCube.width;
@@ -814,6 +821,8 @@ function drawCone(modelCone) {
 
     let circleArray;
     var cone = generic();
+    cone.center = modelCone.center;
+    cone.animation.rps = modelCone.animation.rps;
     let n = modelCone.sides;
     let center = modelCone.center;
     let radius = modelCone.radius;
@@ -864,6 +873,8 @@ function degreesToRadians(degrees) {
 function drawCylinder(modelCylinder) {
     var cylinder = generic();
     cylinder.matrix= new Matrix(4, 4);
+    cylinder.center = modelCylinder.center;
+    cylinder.animation.rps = modelCylinder.animation.rps;
 
     var n = modelCylinder.sides;
     var center = modelCylinder.center;
@@ -916,8 +927,10 @@ function drawCylinder(modelCylinder) {
 
 function drawSphere(modelSphere) {
     var sphere = generic();
+    sphere.center = modelSphere.center;
     var n = modelSphere.stacks;
     var radius = modelSphere.radius;
+    sphere.animation.rps = modelSphere.animation.rps;
     var center = [0,0,0]; //instead of translating it, just calculate then translate
     var degrees = 360/modelSphere.slices;
     var translating = modelSphere.center;
@@ -969,4 +982,44 @@ function drawSphere(modelSphere) {
 
 
 
+
+function avgX(model){
+    var max =  Number.MIN_SAFE_INTEGER;
+    var min =  Number.MAX_SAFE_INTEGER;
+    for (let i=0; i<model.vertices.length; i++) {
+        if (model.vertices[i].x > max){
+            max = model.vertices[i].x;
+        }
+        if (model.vertices[i].x < min){
+            min = model.vertices[i].x;
+        }
+    }
+    return (max+min)/2;
+}
+function avgY(model){
+    var max =  Number.MIN_SAFE_INTEGER;
+    var min =  Number.MAX_SAFE_INTEGER;
+    for (let i=0; i<model.vertices.length; i++) {
+        if (model.vertices[i].y > max){
+            max = model.vertices[i].y;
+        }
+        if (model.vertices[i].y < min){
+            min = model.vertices[i].y;
+        }
+    }
+    return 10
+}
+function avgZ(model){
+    var max =  Number.MIN_SAFE_INTEGER;
+    var min =  Number.MAX_SAFE_INTEGER;
+    for (let i=0; i<model.vertices.length; i++) {
+        if (model.vertices[i].z > max){
+            max = model.vertices[i].z;
+        }
+        if (model.vertices[i].z < min){
+            min = model.vertices[i].z;
+        }
+    }
+    return (max+min)/2;
+}
 

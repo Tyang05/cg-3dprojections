@@ -21,6 +21,7 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     let rotate = new Matrix(4, 4);
     mat4x4Identity(rotate);
     mat4x4PerspectiveRotate(rotate, u, v, n);
+    //console.log("rotate: " + rotate);
 
     // 3. shear such that CW is on the z-axis
     let left = clip[0];
@@ -140,7 +141,42 @@ function mat4x4MPer() {
     return mper;
 }
 
+function please_animate(vertex, degrees, nMatrix, center) {
+    
+    //translate to center
+    var translate_center = new Matrix(4,4);
+    mat4x4Identity(translate_center);
+    mat4x4Translate(translate_center, -center.x, -center.y, -center.z);
+    
+    // rotate theta degrees (calculated based on time)
+    var rotate_y = new Matrix(4,4);
+    mat4x4Identity(rotate_y);
+    mat4x4RotateY(rotate_y, degreesToRadians(degrees));
+            
+    // translate back to where it should be
+    var translate_back = new Matrix(4,4);
+    mat4x4Identity(translate_back);
+    mat4x4Translate(translate_back, center.x, center.y, center.z);
+            
+    // get final animation matrix
+    var mult_array = [];
+    mult_array.push(translate_back);
+    mult_array.push(rotate_y);
+    mult_array.push(translate_center);
+    
+    var rotate_matrix = Matrix.multiply(mult_array);
+    
 
+    //multiply the rotation matrix, nMatrix and current vertex togther for where it should be
+    let final_array = [];
+    final_array.push(nMatrix);
+    final_array.push(rotate_matrix);
+    final_array.push(vertex);
+    var animation = Matrix.multiply(final_array);
+    
+
+    return animation;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 // 4x4 Transform Matrices                                                         //
@@ -188,17 +224,6 @@ function mat4x4Scale(mat4x4, sx, sy, sz) {
                      [0,  0,  0, 1]];
 }
 
-// set values of existing 4x4 matrix to the rotate about x-axis matrix
-function mat4x4RotateX(mat4x4, theta) {
-    // mat4x4.values = ...;
-    mat4x4.values = [[1,               0,                  0, 0],
-                     [0, Math.cos(theta), -(Math.sin(theta)), 0],
-                     [0, Math.sin(theta),    Math.cos(theta), 0],
-                     [0,               0,                  0, 1]];
-}
-
-
-// set values of existing 4x4 matrix to align (u,v,n) to (x,y,z)
 function mat4x4RotateV(mat4x4, v, theta) {
     let row0col0 = Math.cos(theta) + Math.pow(2, v.x) * (1 - Math.cos(theta));
     let row0col1 = v.x * v.y * (1 - Math.cos(theta)) - v.z * Math.sin(theta);
@@ -216,6 +241,15 @@ function mat4x4RotateV(mat4x4, v, theta) {
                     [row1col0, row1col1, row1col2,  0],
                     [row2col0, row2col1, row2col2,  0],
                     [0,     0,        0,            1]];
+}
+
+// set values of existing 4x4 matrix to the rotate about x-axis matrix
+function mat4x4RotateX(mat4x4, theta) {
+    // mat4x4.values = ...;
+    mat4x4.values = [[1,               0,                  0, 0],
+                     [0, Math.cos(theta), -(Math.sin(theta)), 0],
+                     [0, Math.sin(theta),    Math.cos(theta), 0],
+                     [0,               0,                  0, 1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about y-axis matrix
