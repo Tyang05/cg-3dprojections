@@ -33,10 +33,11 @@ function init() {
             */
             
             type: "parallel",
-            prp: Vector3(44, 20, -21),
-            srp: Vector3(20, 20, -45),
+            //type: 'perspective',
+            prp: Vector3(10, 9, 0),
+            srp: Vector3(10, 9, -30),
             vup: Vector3(0, 1, 0),
-            clip: [-15, 5, -10, 10, 12, 100]
+            clip: [-11, 11, -11, 11, 30, 100]
         },
         models: [
             {
@@ -64,8 +65,8 @@ function init() {
                     [4, 9]
                 ],
                 matrix: new Matrix(4, 4)
-            }/*,  
-             {
+            },  
+             /*{
                  "type": 'cube',
                  "center": [10, 0, -20], //doesn't work with 10,0,-20 or 10,25-20
                  "width": 10,
@@ -76,7 +77,7 @@ function init() {
                          "rps": 0.5
                      }
             
-             },
+             }/*,
              {
                  "type": "cone",
                  "center": [-30, 10, -30],
@@ -98,10 +99,10 @@ function init() {
                      "axis": "y",
                      "rps": 0.5
                  }
-             },
+             },*/
              {
                  "type": "sphere",
-                 "center": [-15, 45, -65],
+                 "center": [-10, 0, -20],
                  "radius": 20,
                  "slices": 20,
                  "stacks": 20,
@@ -109,7 +110,7 @@ function init() {
                      "axis": "y",
                      "rps": 0.5
                  }
-             }*/
+             }
         ]
     };
 
@@ -353,6 +354,11 @@ function drawParallel() {
                     let y1 = pt0.y / pt0.w;
                     let x2 = pt1.x / pt1.w;
                     let y2 = pt1.y / pt1.w;
+
+                    console.log(x1);
+                    console.log(x2);
+                    console.log(y1);
+                    console.log(y2);
 
                     // Draw the line
                     drawLine(x1, y1, x2, y2);
