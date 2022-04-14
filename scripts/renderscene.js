@@ -243,7 +243,7 @@ function drawPerspective(time) {
 
     // The vertices array which contains sets of vertices from each individual models.
     // e.g. vertices[0] = model[0] sets of vertices, vertices[1] = model[1] sets of vertices and so forth
-    let vertices = [];
+    let vertices = []; 
     let counter = 0;
     // For loop iterate and access all the given vertices
     // Use the given vertices and multiply it by matrix(mPer)
