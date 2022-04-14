@@ -25,92 +25,92 @@ function init() {
     scene = {
 
 
-        view: {
-            type: 'perspective',
-            prp: Vector3(44, 20, -16),
-            srp: Vector3(20, 20, -40),
-            vup: Vector3(0, 1, 0),
-            clip: [-19, 5, -10, 8, 12, 100]
-        },
-        models: [
-            {
-                type: 'generic',
-                vertices: [
-                    Vector4( 20,  0, -30, 1), // 0 //doesn't work when you do 90, 0 ,-20,
-                    Vector4(20,  12, -30, 1), // 1
-                    Vector4(10, 20, -30, 1), // 2
-                    Vector4(0, 12, -30, 1), // 3
-                    Vector4( 0, 0, -30, 1), // 4
+    //     view: {
+    //         type: 'perspective',
+    //         prp: Vector3(44, 20, -16),
+    //         srp: Vector3(20, 20, -40),
+    //         vup: Vector3(0, 1, 0),
+    //         clip: [-19, 5, -10, 8, 12, 100]
+    //     },
+    //     models: [
+    //         {
+    //             type: 'generic',
+    //             vertices: [
+    //                 Vector4( 20,  0, -30, 1), 
+    //                 Vector4(20,  12, -30, 1), 
+    //                 Vector4(10, 20, -30, 1), 
+    //                 Vector4(0, 12, -30, 1), 
+    //                 Vector4( 0, 0, -30, 1), 
                     
-                    Vector4( 20,  0, -60, 1), // 5
-                    Vector4(20,  12, -60, 1), // 6
-                    Vector4(10, 20, -60, 1), // 7 
-                    Vector4(0, 12, -60, 1), // 8
-                    Vector4( 0, 0, -60, 1)  // 9
-                ],
-                edges: [
-                    [0, 1, 2, 3, 4, 0], // [0,1] [1,2] [2,3] [3,4] [4,0] // 0
-                    [5, 6, 7, 8, 9, 5], // [5,6] [6,7] [7,8] [8,9] [9,5] // 1
-                    [0, 5], // 2 
-                    [1, 6], // 3
-                    [2, 7],
-                    [3, 8],
-                    [4, 9]
-                ],
-                matrix: new Matrix(4, 4),
-                "animation": {
-                             "axis": "y",
-                             "rps": .5
-                         }
-            },  
-            {
-                "type": 'cube',
-                "center": [10, 0, -20], 
-                "width": 10,
-                "height": 10,
-                "depth": 10,
-                "animation": {
-                       "axis": "y",
-                       "rps": 1
-                }
-            },
-            {
-                "type": "cone",
-                "center": [-30, 10, -30],
-                "radius": 10,
-                "height": 50,
-                "sides": 50,
-                "animation": {
-                    "axis": "y",
-                    "rps": 2
-                }
-            },
-            {
-                "type": "cylinder",
-                "center": [-30, 25, -10],
-                "radius": 5,
-                "height": 40,
-                "sides": 50,
-                "animation": {
-                    "axis": "y",
-                    "rps": 3
-                }
-            },
-            {
-                "type": "sphere",
-                "center": [-15, 45, -65],
-                "radius": 20,
-                "slices": 20,
-                "stacks": 20,
-                "animation": {
-                    "axis": "y",
-                    "rps": 4
-                }
-            }
-        ]
-    };           //
+    //                 Vector4( 20,  0, -60, 1), 
+    //                 Vector4(20,  12, -60, 1), 
+    //                 Vector4(10, 20, -60, 1), 
+    //                 Vector4(0, 12, -60, 1), 
+    //                 Vector4( 0, 0, -60, 1)  
+    //             ],
+    //             edges: [
+    //                 [0, 1, 2, 3, 4, 0], 
+    //                 [5, 6, 7, 8, 9, 5], 
+    //                 [0, 5], 
+    //                 [1, 6], 
+    //                 [2, 7],
+    //                 [3, 8],
+    //                 [4, 9]
+    //             ],
+    //             matrix: new Matrix(4, 4),
+    //             "animation": {
+    //                          "axis": "y",
+    //                          "rps": .5
+    //                      }
+    //         },  
+    //         {
+    //             "type": 'cube',
+    //             "center": [10, 0, -20], 
+    //             "width": 10,
+    //             "height": 10,
+    //             "depth": 10,
+    //             "animation": {
+    //                    "axis": "y",
+    //                    "rps": 1
+    //             }
+    //         },
+    //         {
+    //             "type": "cone",
+    //             "center": [-30, 10, -30],
+    //             "radius": 10,
+    //             "height": 50,
+    //             "sides": 50,
+    //             "animation": {
+    //                 "axis": "y",
+    //                 "rps": 2
+    //             }
+    //         },
+    //         {
+    //             "type": "cylinder",
+    //             "center": [-30, 25, -10],
+    //             "radius": 5,
+    //             "height": 40,
+    //             "sides": 50,
+    //             "animation": {
+    //                 "axis": "y",
+    //                 "rps": 3
+    //             }
+    //         },
+    //         {
+    //             "type": "sphere",
+    //             "center": [-15, 45, -65],
+    //             "radius": 20,
+    //             "slices": 20,
+    //             "stacks": 20,
+    //             "animation": {
+    //                 "axis": "y",
+    //                 "rps": 4
+    //             }
+    //         }
+    //     ]
+    // };           
 
-   /*
+   
     view: {
         type: "parallel",
         prp: Vector3(10, 9, 0),
@@ -194,9 +194,9 @@ function init() {
                 "rps": 4
             }
         }
-    ]*/
+    ]
     
-//};
+};
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
@@ -232,7 +232,7 @@ function drawScene(time) {
     if (scene.view.type == "perspective") {
         drawPerspective(time);
     } else {
-        drawParallel();
+        drawParallel(time);
     }
 }
 function drawPerspective(time) {
@@ -331,8 +331,8 @@ function drawPerspective(time) {
     }
 }
 
-function drawParallel() {
-    var nPer = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+function drawParallel(time) {
+    var nPar = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
     //console.log(nPer);
 
     // The vertices array which contains sets of vertices from each individual models.
@@ -352,13 +352,16 @@ function drawParallel() {
             scene.models[i] = drawCylinder(scene.models[i]);
         } else if(scene.models[i].type == "sphere") {
             scene.models[i] = drawSphere(scene.models[i]);
+        } else if(scene.models[i].type == "generic" ){
+            scene.models[i].center  = Vector3(avgX(scene.models[i]), avgY(scene.models[i]), avgZ(scene.models[i]));
         }
         // The set of vertices for the current model
         let verticesTemp = [];
+        let degrees = 360 * scene.models[i].animation.rps * time;
+        console.log(degrees);
         // For loop iterate through all the vertices and multiply by nPer
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
-            verticesTemp[j] = nPer.mult(scene.models[i].vertices[j]);
-            
+            verticesTemp[j] = please_animate(scene.models[i].vertices[j], degrees, nPar, scene.models[i].center);
         }
         // Add vertices to the verticesTemp
         vertices.push(verticesTemp);
