@@ -173,7 +173,7 @@ function drawPerspective(degrees) {
         }
         //(360/scene.models[i].animation.rps);
       
-        degrees = (360*scene.models[i].animation.rps)/degrees;
+        //(360*scene.models[i].animation.rps)/degrees;
         console.log(scene.models[i].type);
         console.log(scene.models[i].animation.rps);
         
