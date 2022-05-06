@@ -987,49 +987,36 @@ function drawSphere(modelSphere) {
         var rotate = new Matrix(4,4);
         mat4x4Identity(rotate);
         mat4x4RotateY(rotate, degreesToRadians(degrees*i));
-
         for(var j=0; j<n; j+=.5) {
             var radian = degreesToRadians((360/n)*j);
             var x0 = (center[0] + radius * Math.cos(radian));
             var y0 = (center[1] + radius * Math.sin(radian));
             var z0 = (center[2]);
-    
             let pt0 = Vector4(x0,y0,z0,1);
-
             var translate = new Matrix(4,4);
             mat4x4Identity(translate);
             mat4x4Translate(translate, translating[0], translating[1], translating[2], 1);
-            
             var mult_array = [];
             mult_array.push(translate);
             mult_array.push(rotate);
             mult_array.push(pt0);
-
-
             var final = [];
             final = Matrix.multiply(mult_array).rawArray();
             let pushed = Vector4(final[0], final[1], final[2], final[3]);
-
             sphere.vertices.push(pushed);
-
         }     
     }
     for (var i=0; i<sphere.vertices.length-modelSphere.stacks*2 ; i++){
         //left to right
         sphere.edges.push([i, i+modelSphere.stacks*2]);
     }
-
     for (var i=0; i<sphere.vertices.length; i++){
         if ((i+1)%(modelSphere.stacks*2) != 0 && (i) % (modelSphere.stacks*2) != 19){
             sphere.edges.push([i,i+1]);
         } 
-    }
-    
+    } 
     return sphere;
 }
-
-
-
 
 function avgX(model){
     var max =  Number.MIN_SAFE_INTEGER;
