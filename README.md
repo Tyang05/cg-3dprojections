@@ -1,3 +1,3 @@
-# 3D Projections for Wireframe Rendering
+# 3D Projections
 
-3D Projections starter code using the HTML5 Canvas 2D API
+For this project, our group created five different shapes in 3D by drawing lines. We created a sphere, cylinder, cone, cube, and a house. We transformed these models into canonical view on a view plane. Once these shapes were created, we had to do some animation and manipulation to the shapes. We implemented pressing A/D and W/S keys to create camera movement to change the view of the scene. Not only that, but we also animated the shapes rotating left to right across its center axis. When you move the camera around, we had to implement clipping to clip the shapes away when they are not in the view plane. These 3D shapes were implements via parallel and perspective projection. You could also upload your own vertices from a file to the page and it will load in the shape to the plane view. 
